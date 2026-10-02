@@ -61,6 +61,26 @@ def deny_external_network(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
     network connection must explicitly replace this guard at their boundary.
     """
 
+    orig_connect = socket.socket.connect
+    orig_connect_ex = socket.socket.connect_ex
+
+    def is_loopback(address: Any) -> bool:
+        return isinstance(address, tuple) and bool(address) and address[0] in ("127.0.0.1", "localhost", "::1")
+
+    def blocked_connect(self: socket.socket, address: Any, *args: Any, **kwargs: Any) -> Any:
+        if is_loopback(address):
+            return orig_connect(self, address, *args, **kwargs)
+        raise UnexpectedNetworkAccess(
+            "External network access blocked in deterministic backend tests"
+        )
+
+    def blocked_connect_ex(self: socket.socket, address: Any, *args: Any, **kwargs: Any) -> Any:
+        if is_loopback(address):
+            return orig_connect_ex(self, address, *args, **kwargs)
+        raise UnexpectedNetworkAccess(
+            "External network access blocked in deterministic backend tests"
+        )
+
     def blocked_connection(*args: Any, **kwargs: Any) -> NoReturn:
         del args, kwargs
         raise UnexpectedNetworkAccess(
@@ -68,8 +88,8 @@ def deny_external_network(monkeypatch: pytest.MonkeyPatch) -> Iterator[None]:
         )
 
     monkeypatch.setattr(socket, "create_connection", blocked_connection)
-    monkeypatch.setattr(socket.socket, "connect", blocked_connection)
-    monkeypatch.setattr(socket.socket, "connect_ex", blocked_connection)
+    monkeypatch.setattr(socket.socket, "connect", blocked_connect)
+    monkeypatch.setattr(socket.socket, "connect_ex", blocked_connect_ex)
     yield
 
 

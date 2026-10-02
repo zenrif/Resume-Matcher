@@ -14,6 +14,10 @@ from unittest.mock import AsyncMock, patch
 
 def _block_external_io(event: str, args: tuple[object, ...]) -> None:
     """Fail the probe if the mocked SDK transport ever reaches the network."""
+    if event == "socket.connect" and len(args) >= 2:
+        addr = args[1]
+        if isinstance(addr, tuple) and addr and addr[0] in ("127.0.0.1", "localhost", "::1"):
+            return
     if event in {"socket.connect", "socket.getaddrinfo"}:
         raise RuntimeError(f"temperature contract probe blocked {event}: {args!r}")
 
