@@ -10,7 +10,30 @@ http://localhost:8000/api/v1
 
 ## Authentication
 
-Currently none (local-first design).
+Session cookie-based authentication via `rm_session` HTTP-only cookie.
+Endpoints requiring authentication resolve current user context and reject unauthenticated calls with 401.
+See `docs/agent/features/auth.md` for full security and lifecycle documentation.
+
+### Auth Endpoints
+
+```
+POST /auth/login               ← {email, password} → {user: {id, email, display_name, role, is_active}} (Sets rm_session cookie)
+POST /auth/logout              → 204 No Content (Clears rm_session cookie)
+GET  /auth/me                  → {id, email, display_name, role, is_active, created_at, updated_at}
+POST /auth/password            ← {current_password, new_password} → {status: "ok"}
+GET  /auth/invite/{token}      → {email, purpose, expires_at}
+POST /auth/invite/{token}      ← {password} → {user, status: "ok"} (Sets rm_session cookie)
+```
+
+### Admin User Management Endpoints
+
+```
+GET  /admin/users              → [{id, email, display_name, role, is_active, ...}]
+POST /admin/users              ← {email, display_name?, role?} → 201 {user, invite_path}
+POST /admin/users/{id}/deactivate   → {user, status: "ok"}
+POST /admin/users/{id}/reactivate   → {user, status: "ok"}
+POST /admin/users/{id}/reset-password → {reset_path, expires_at}
+```
 
 ## Endpoints
 

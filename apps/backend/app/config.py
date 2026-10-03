@@ -380,6 +380,38 @@ class Settings(BaseSettings):
         "http://127.0.0.1:3000",
     ]
 
+    # Auth & Multi-user Configuration
+    auth_cookie_secure: bool = True
+    auth_session_days: int = 30
+    admin_email: str | None = None
+    public_base_url: str | None = None
+    default_daily_ai_limit: int = 30
+    trust_proxy: bool = False
+    invite_ttl_days: int = 7
+    min_password_length: int = 10
+    docs_enabled: bool = False
+
+    @field_validator("admin_email", mode="before")
+    @classmethod
+    def normalize_admin_email(cls, v: Any) -> str | None:
+        """Normalize admin email to lowercased string or None."""
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return None
+        return str(v).strip().lower()
+
+    @field_validator("public_base_url", mode="before")
+    @classmethod
+    def normalize_public_base_url(cls, v: Any) -> str | None:
+        """Normalize public base URL or None."""
+        if v is None or (isinstance(v, str) and not v.strip()):
+            return None
+        return str(v).strip().rstrip("/")
+
+    @property
+    def effective_public_base_url(self) -> str:
+        """Public base URL, falling back to frontend_base_url."""
+        return (self.public_base_url or self.frontend_base_url).strip().rstrip("/")
+
     @property
     def effective_cors_origins(self) -> list[str]:
         """CORS origins including frontend_base_url for production deployments."""

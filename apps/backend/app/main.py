@@ -5,8 +5,9 @@ import logging
 import sys
 from collections.abc import AsyncIterator
 from contextlib import asynccontextmanager
+from typing import Any
 
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, Response, status
 from fastapi.responses import JSONResponse
 
 # Fix for Windows: Use ProactorEventLoop for subprocess support (Playwright)
@@ -22,7 +23,9 @@ from app.config import settings
 from app.database import DatabaseBusyError, db
 from app.pdf import close_pdf_renderer, init_pdf_renderer
 from app.routers import (
+    admin_users_router,
     applications_router,
+    auth_router,
     config_router,
     enrichment_router,
     health_router,
@@ -59,6 +62,49 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
     from app.config import migrate_legacy_keys
 
     migrate_legacy_keys()
+
+    # Bootstrap initial admin account if users table is empty
+    user_count = await db.count_users()
+    if user_count == 0:
+        if settings.admin_email:
+            from datetime import timedelta, timezone
+            from uuid import uuid4
+            from app.auth.sessions import generate_token, hash_token
+
+            admin_id = str(uuid4())
+            admin_email = settings.admin_email.strip().lower()
+            admin_name = admin_email.split("@")[0].capitalize()
+            await db.create_user(
+                id=admin_id,
+                email=admin_email,
+                display_name=admin_name,
+                password_hash=None,
+                role="admin",
+                is_active=True,
+                content_language="id",
+                daily_ai_limit=None,
+            )
+            token = generate_token()
+            token_hash = hash_token(token)
+            expires_at = (
+                datetime.now(timezone.utc) + timedelta(days=settings.invite_ttl_days)
+            ).isoformat()
+            await db.create_invite(
+                token_hash=token_hash,
+                user_id=admin_id,
+                purpose="invite",
+                expires_at=expires_at,
+            )
+            logger.info(
+                "Bootstrap admin invite: %s/invite/%s",
+                settings.effective_public_base_url,
+                token,
+            )
+        else:
+            logger.warning(
+                "No users exist and ADMIN_EMAIL is unset. Run 'python -m app.scripts.create_admin --email <email>' to create an admin."
+            )
+
     # PDF renderer uses lazy initialization - will initialize on first use
     # await init_pdf_renderer()
     yield
@@ -84,7 +130,27 @@ app = FastAPI(
     description="AI-powered resume tailoring for job descriptions",
     version=__version__,
     lifespan=lifespan,
+    docs_url="/docs" if settings.docs_enabled else None,
+    redoc_url="/redoc" if settings.docs_enabled else None,
+    openapi_url="/openapi.json" if settings.docs_enabled else None,
 )
+
+
+@app.middleware("http")
+async def verify_origin_middleware(request: Request, call_next: Any) -> Response:
+    """Block state-changing requests from origins outside the allowed CORS list."""
+    if request.method in ("POST", "PUT", "PATCH", "DELETE"):
+        origin = request.headers.get("origin")
+        if origin:
+            normalized_origin = origin.strip().rstrip("/")
+            normalized_allowed = {o.strip().rstrip("/") for o in settings.effective_cors_origins}
+            if normalized_origin not in normalized_allowed:
+                return JSONResponse(
+                    status_code=status.HTTP_403_FORBIDDEN,
+                    content={"detail": "Origin not allowed."},
+                )
+    return await call_next(request)
+
 
 @app.exception_handler(DatabaseBusyError)
 async def database_busy_handler(request: Request, error: DatabaseBusyError) -> JSONResponse:
@@ -106,6 +172,8 @@ app.add_middleware(
 )
 
 # Include routers
+app.include_router(auth_router, prefix="/api/v1")
+app.include_router(admin_users_router, prefix="/api/v1")
 app.include_router(health_router, prefix="/api/v1")
 app.include_router(config_router, prefix="/api/v1")
 app.include_router(resumes_router, prefix="/api/v1")

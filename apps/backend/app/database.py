@@ -28,7 +28,17 @@ from sqlalchemy.orm import Session, sessionmaker
 
 from app.config import settings
 from app.db_engine import init_models_sync, make_async_engine, make_sync_engine
-from app.models import ApiKey, Application, Improvement, Job, Resume, TailoringPreview
+from app.models import (
+    ApiKey,
+    Application,
+    AuthSession,
+    Improvement,
+    Invite,
+    Job,
+    Resume,
+    TailoringPreview,
+    User,
+)
 from app.preview import (
     PreviewBusyError,
     PreviewClaim,
@@ -1306,6 +1316,225 @@ class Database:
         if uploads_dir.exists():
             shutil.rmtree(uploads_dir)
             uploads_dir.mkdir(parents=True, exist_ok=True)
+
+    # -- Auth & User operations ---------------------------------------------
+
+    @staticmethod
+    def _user_to_dict(row: User) -> dict[str, Any]:
+        return {
+            "id": row.id,
+            "email": row.email,
+            "display_name": row.display_name,
+            "password_hash": row.password_hash,
+            "role": row.role,
+            "is_active": row.is_active,
+            "content_language": row.content_language,
+            "daily_ai_limit": row.daily_ai_limit,
+            "created_at": row.created_at,
+            "last_login_at": row.last_login_at,
+        }
+
+    @staticmethod
+    def _session_to_dict(row: AuthSession) -> dict[str, Any]:
+        return {
+            "token_hash": row.token_hash,
+            "user_id": row.user_id,
+            "created_at": row.created_at,
+            "expires_at": row.expires_at,
+            "last_seen_at": row.last_seen_at,
+        }
+
+    @staticmethod
+    def _invite_to_dict(row: Invite) -> dict[str, Any]:
+        return {
+            "token_hash": row.token_hash,
+            "user_id": row.user_id,
+            "purpose": row.purpose,
+            "created_at": row.created_at,
+            "expires_at": row.expires_at,
+            "used_at": row.used_at,
+        }
+
+    async def create_user(
+        self,
+        id: str,
+        email: str,
+        display_name: str,
+        password_hash: str | None = None,
+        role: str = "user",
+        is_active: bool = True,
+        content_language: str = "id",
+        daily_ai_limit: int | None = None,
+    ) -> dict[str, Any]:
+        """Create a new user record."""
+        row = User(
+            id=id,
+            email=email.strip().lower(),
+            display_name=display_name.strip(),
+            password_hash=password_hash,
+            role=role,
+            is_active=is_active,
+            content_language=content_language,
+            daily_ai_limit=daily_ai_limit,
+            created_at=_now(),
+        )
+        async with self._write_session() as session:
+            session.add(row)
+            await session.commit()
+        return self._user_to_dict(row)
+
+    async def get_user(self, user_id: str) -> dict[str, Any] | None:
+        """Fetch a user by their unique ID."""
+        async with self._session() as session:
+            row = await session.get(User, user_id)
+            return self._user_to_dict(row) if row else None
+
+    async def get_user_by_email(self, email: str) -> dict[str, Any] | None:
+        """Fetch a user by normalized email address."""
+        normalized = email.strip().lower()
+        async with self._session() as session:
+            stmt = select(User).where(User.email == normalized)
+            row = (await session.scalars(stmt)).first()
+            return self._user_to_dict(row) if row else None
+
+    async def list_users(self) -> list[dict[str, Any]]:
+        """List all users ordered by creation date."""
+        async with self._session() as session:
+            stmt = select(User).order_by(User.created_at.asc())
+            rows = (await session.scalars(stmt)).all()
+            return [self._user_to_dict(r) for r in rows]
+
+    async def count_users(self) -> int:
+        """Count the total number of registered users."""
+        async with self._session() as session:
+            count = await session.scalar(select(func.count()).select_from(User))
+            return int(count or 0)
+
+    async def update_user(self, user_id: str, **kwargs: Any) -> dict[str, Any] | None:
+        """Update fields on an existing user."""
+        async with self._write_session() as session:
+            row = await session.get(User, user_id)
+            if not row:
+                return None
+            for key, val in kwargs.items():
+                if hasattr(row, key):
+                    setattr(row, key, val)
+            await session.commit()
+            return self._user_to_dict(row)
+
+    async def update_user_password(self, user_id: str, password_hash: str) -> bool:
+        """Update a user's password hash."""
+        async with self._write_session() as session:
+            stmt = update(User).where(User.id == user_id).values(password_hash=password_hash)
+            res = await session.execute(stmt)
+            await session.commit()
+            return bool(res.rowcount)
+
+    async def update_user_last_login(self, user_id: str) -> None:
+        """Update last_login_at timestamp for a user."""
+        async with self._write_session() as session:
+            stmt = update(User).where(User.id == user_id).values(last_login_at=_now())
+            await session.execute(stmt)
+            await session.commit()
+
+    async def create_session(
+        self,
+        token_hash: str,
+        user_id: str,
+        expires_at: str,
+    ) -> dict[str, Any]:
+        """Persist a new session token hash."""
+        now = _now()
+        row = AuthSession(
+            token_hash=token_hash,
+            user_id=user_id,
+            created_at=now,
+            expires_at=expires_at,
+            last_seen_at=now,
+        )
+        async with self._write_session() as session:
+            session.add(row)
+            await session.commit()
+        return self._session_to_dict(row)
+
+    async def get_session_by_token_hash(self, token_hash: str) -> dict[str, Any] | None:
+        """Look up a session by token hash."""
+        async with self._session() as session:
+            row = await session.get(AuthSession, token_hash)
+            return self._session_to_dict(row) if row else None
+
+    async def touch_session_last_seen(self, token_hash: str) -> None:
+        """Update last_seen_at timestamp for a session."""
+        async with self._write_session() as session:
+            stmt = (
+                update(AuthSession)
+                .where(AuthSession.token_hash == token_hash)
+                .values(last_seen_at=_now())
+            )
+            await session.execute(stmt)
+            await session.commit()
+
+    async def delete_session(self, token_hash: str) -> bool:
+        """Revoke a single session by token hash."""
+        async with self._write_session() as session:
+            stmt = delete(AuthSession).where(AuthSession.token_hash == token_hash)
+            res = await session.execute(stmt)
+            await session.commit()
+            return bool(res.rowcount)
+
+    async def delete_user_sessions(
+        self,
+        user_id: str,
+        except_token_hash: str | None = None,
+    ) -> int:
+        """Revoke sessions for a user, optionally preserving the current one."""
+        async with self._write_session() as session:
+            conditions = [AuthSession.user_id == user_id]
+            if except_token_hash:
+                conditions.append(AuthSession.token_hash != except_token_hash)
+            stmt = delete(AuthSession).where(and_(*conditions))
+            res = await session.execute(stmt)
+            await session.commit()
+            return int(res.rowcount or 0)
+
+    async def create_invite(
+        self,
+        token_hash: str,
+        user_id: str,
+        purpose: str,
+        expires_at: str,
+    ) -> dict[str, Any]:
+        """Persist an invite or password-reset token hash."""
+        row = Invite(
+            token_hash=token_hash,
+            user_id=user_id,
+            purpose=purpose,
+            created_at=_now(),
+            expires_at=expires_at,
+            used_at=None,
+        )
+        async with self._write_session() as session:
+            session.add(row)
+            await session.commit()
+        return self._invite_to_dict(row)
+
+    async def get_invite_by_token_hash(self, token_hash: str) -> dict[str, Any] | None:
+        """Look up an invite by token hash."""
+        async with self._session() as session:
+            row = await session.get(Invite, token_hash)
+            return self._invite_to_dict(row) if row else None
+
+    async def mark_invite_used(self, token_hash: str) -> bool:
+        """Mark an unused invite as used."""
+        async with self._write_session() as session:
+            stmt = (
+                update(Invite)
+                .where(Invite.token_hash == token_hash, Invite.used_at.is_(None))
+                .values(used_at=_now())
+            )
+            res = await session.execute(stmt)
+            await session.commit()
+            return bool(res.rowcount)
 
 
 # Global database instance

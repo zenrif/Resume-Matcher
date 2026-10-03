@@ -19,6 +19,7 @@ dependencies = [
     "playwright==1.58.0",
     "python-docx==1.2.0",
     "python-dotenv==1.2.2",
+    "argon2-cffi==25.1.0",
 ]
 
 [project.scripts]
@@ -63,4 +64,5 @@ markers = [
     "service: service layer tests with mocked LLM",
     "integration: API endpoint tests with httpx AsyncClient",
     "eval: prompt-quality evaluations; may call a real LLM, skipped without a configured key",
+    "no_auth: skip default authenticated user override in auth integration tests",
 ]
