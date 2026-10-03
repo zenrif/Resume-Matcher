@@ -4,10 +4,13 @@ import React from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid';
+import LogOut from 'lucide-react/dist/esm/icons/log-out';
 import { useTranslations } from '@/lib/i18n';
+import { useAuth } from '@/lib/context/auth-context';
 
 export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
   const { t } = useTranslations();
+  const { user, logout } = useAuth();
 
   return (
     // 1. Outer Wrapper: Fixed height with grid background
@@ -46,7 +49,7 @@ export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
 
         {/* Footer - stays above hovered cards */}
         <div className="p-4 bg-background flex justify-between items-center font-mono text-xs text-blue-700 border-t border-black shrink-0 relative z-30">
-          <div className="flex items-center gap-2">
+          <div className="flex items-center gap-3">
             <Image
               src="/logo.svg"
               alt="Resume Matcher"
@@ -55,21 +58,34 @@ export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
               className="w-5 h-5"
             />
             <span className="uppercase font-bold">Resume Matcher</span>
+            {user?.email && (
+              <span className="hidden md:inline font-mono text-[11px] text-ink-soft lowercase border-l border-black/30 pl-3">
+                {user.email}
+              </span>
+            )}
           </div>
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <Link
               href="/tracker"
-              className="inline-flex items-center justify-center gap-2 bg-background text-black border border-black px-6 py-2 uppercase font-bold tracking-wide shadow-sw-sm hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all min-w-[140px] text-center"
+              className="inline-flex items-center justify-center gap-2 bg-background text-black border border-black px-5 py-2 uppercase font-bold tracking-wide shadow-sw-sm hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all text-center"
             >
               <LayoutGrid className="w-4 h-4" />
               {t('nav.applicationTracker')}
             </Link>
             <Link
               href="/settings"
-              className="bg-warning text-black border border-black px-6 py-2 uppercase font-bold tracking-wide shadow-sw-sm hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all min-w-[140px] text-center"
+              className="bg-warning text-black border border-black px-5 py-2 uppercase font-bold tracking-wide shadow-sw-sm hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all text-center"
             >
               {t('nav.settings')}
             </Link>
+            <button
+              onClick={() => void logout()}
+              className="inline-flex items-center justify-center gap-1.5 bg-paper-tint text-black border border-black px-4 py-2 uppercase font-bold tracking-wide shadow-sw-sm hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none transition-all text-center cursor-pointer"
+              title={t('auth.logout')}
+            >
+              <LogOut className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">{t('auth.logout')}</span>
+            </button>
           </div>
         </div>
       </div>

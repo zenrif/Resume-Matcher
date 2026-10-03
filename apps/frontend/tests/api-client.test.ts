@@ -1,5 +1,5 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
-import { API_BASE, apiFetch, apiPost, getUploadUrl } from '@/lib/api/client';
+import { API_BASE, apiFetch, apiPost, getUploadUrl, sanitizeNextUrl } from '@/lib/api/client';
 
 /**
  * The single backend client. Tests cover URL resolution, JSON POST shape, and
@@ -198,5 +198,73 @@ describe('api client', () => {
         expect(requestSignal?.aborted).toBe(false);
       }
     );
+  });
+
+  describe('sanitizeNextUrl', () => {
+    it('allows valid relative URLs', () => {
+      expect(sanitizeNextUrl('/tracker')).toBe('/tracker');
+      expect(sanitizeNextUrl('/resumes/123?tab=cover')).toBe('/resumes/123?tab=cover');
+    });
+
+    it('rejects protocol-relative and malformed slashes', () => {
+      expect(sanitizeNextUrl('//evil.com')).toBe('/dashboard');
+      expect(sanitizeNextUrl('/\\evil.com')).toBe('/dashboard');
+    });
+
+    it('rejects absolute URLs', () => {
+      expect(sanitizeNextUrl('https://evil.com')).toBe('/dashboard');
+      expect(sanitizeNextUrl('javascript:alert(1)')).toBe('/dashboard');
+    });
+
+    it('defaults empty or null to /dashboard', () => {
+      expect(sanitizeNextUrl('')).toBe('/dashboard');
+      expect(sanitizeNextUrl(null)).toBe('/dashboard');
+      expect(sanitizeNextUrl(undefined)).toBe('/dashboard');
+    });
+  });
+
+  describe('apiFetch 401 redirect', () => {
+    it('redirects to /login when receiving 401 on non-auth endpoint in browser', async () => {
+      const originalLocation = window.location;
+      delete (window as unknown as { location?: unknown }).location;
+      (
+        window as unknown as { location: { href: string; pathname: string; search: string } }
+      ).location = {
+        href: 'http://localhost:3000/tracker',
+        pathname: '/tracker',
+        search: '?filter=active',
+      };
+
+      try {
+        fetchMock.mockResolvedValueOnce(new Response('{}', { status: 401 }));
+        await apiFetch('/resumes');
+        expect(window.location.href).toBe('/login?next=%2Ftracker%3Ffilter%3Dactive');
+      } finally {
+        (window as unknown as { location: unknown }).location = originalLocation;
+      }
+    });
+
+    it('does NOT redirect on 401 for /auth/ endpoints', async () => {
+      const originalLocation = window.location;
+      delete (window as unknown as { location?: unknown }).location;
+      (
+        window as unknown as { location: { href: string; pathname: string; search: string } }
+      ).location = {
+        href: 'http://localhost:3000/login',
+        pathname: '/login',
+        search: '',
+      };
+
+      try {
+        fetchMock.mockResolvedValueOnce(
+          new Response('{"detail":"Invalid password"}', { status: 401 })
+        );
+        const res = await apiFetch('/auth/login');
+        expect(res.status).toBe(401);
+        expect(window.location.href).toBe('http://localhost:3000/login');
+      } finally {
+        (window as unknown as { location: unknown }).location = originalLocation;
+      }
+    });
   });
 });

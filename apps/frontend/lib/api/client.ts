@@ -138,7 +138,22 @@ export async function apiFetch(
 
   try {
     const request = fetch(url, { ...options, signal: controller.signal }).then(bufferResponse);
-    return await Promise.race([request, cancellation]);
+    const response = await Promise.race([request, cancellation]);
+
+    if (
+      typeof window !== 'undefined' &&
+      response.status === 401 &&
+      !normalizedEndpoint.startsWith('/auth/') &&
+      !normalizedEndpoint.startsWith('/api/v1/auth/')
+    ) {
+      const currentPath = window.location.pathname + window.location.search;
+      const safeNext = sanitizeNextUrl(currentPath);
+      if (!window.location.pathname.startsWith('/login')) {
+        window.location.href = `/login?next=${encodeURIComponent(safeNext)}`;
+      }
+    }
+
+    return response;
   } catch (error) {
     if (error instanceof Error && error.name === 'AbortError') {
       if (callerSignal?.aborted) {
@@ -213,4 +228,17 @@ export function parseErrorDetail(body: string): string | null {
   } catch {
     return null;
   }
+}
+
+/**
+ * Sanitizes the `next` redirect path to protect against open redirects.
+ * Only accepts paths starting with a single '/' (rejects '//', '/\', and absolute URLs).
+ */
+export function sanitizeNextUrl(next: string | null | undefined): string {
+  if (!next || typeof next !== 'string') return '/dashboard';
+  const trimmed = next.trim();
+  if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.startsWith('/\\')) {
+    return trimmed;
+  }
+  return '/dashboard';
 }

@@ -812,6 +812,60 @@
       "deleteAria": "{provider} のキーを削除",
       "deleteConfirmTitle": "API キーを削除しますか？",
       "deleteConfirmDescription": "保存された {provider} の API キーを削除しますか？後で再度追加できます。"
+    },
+    "account": {
+      "title": "Account & Quota",
+      "subtitle": "Manage your credentials and daily AI limit",
+      "changePassword": "Change Password",
+      "currentPassword": "Current Password",
+      "newPassword": "New Password",
+      "confirmNewPassword": "Confirm New Password",
+      "updatePassword": "Update Password",
+      "passwordUpdated": "Password updated successfully",
+      "quotaTitle": "Daily AI Usage",
+      "quotaUnlimited": "{used} operations used today (unlimited)",
+      "quotaResetsMidnight": "Quota resets at 00:00 WIB (Asia/Jakarta)",
+      "deleteDataTitle": "Delete All My Data",
+      "deleteDataDescription": "Permanently delete all your uploaded resumes, tailored jobs, applications, and history. This action cannot be undone.",
+      "deleteDataButton": "Delete All My Data",
+      "deleteDataConfirmTitle": "Are you sure you want to delete all your data?",
+      "deleteDataConfirmDescription": "This will permanently delete all your resumes, tailored resumes, job descriptions, and application tracking records. Type RESET_ALL_DATA to confirm.",
+      "deleteDataSuccess": "All your data has been deleted."
+    },
+    "users": {
+      "title": "User Management",
+      "subtitle": "Invite and manage system users",
+      "inviteUser": "Invite User",
+      "inviteEmail": "Email Address",
+      "inviteDisplayName": "Display Name",
+      "inviteRole": "Role",
+      "roleUser": "User",
+      "roleAdmin": "Admin",
+      "dailyQuota": "Daily AI Limit",
+      "dailyQuotaPlaceholder": "Leave empty for system default",
+      "sendInvite": "Generate Invite Link",
+      "inviteSuccess": "User invited successfully",
+      "inviteLinkTitle": "Share this invite link with the user:",
+      "copyLink": "Copy Link",
+      "linkCopied": "Copied!",
+      "usersList": "Registered Users",
+      "tableEmail": "Email",
+      "tableName": "Name",
+      "tableRole": "Role",
+      "tableQuota": "Daily Limit",
+      "tableStatus": "Status",
+      "tableActions": "Actions",
+      "active": "Active",
+      "inactive": "Inactive",
+      "resetLink": "Reset Link",
+      "deactivate": "Deactivate",
+      "activate": "Activate",
+      "delete": "Delete",
+      "deleteUserConfirmTitle": "Delete User",
+      "deleteUserConfirmDescription": "Are you sure you want to delete {email} and all their data? This action cannot be undone.",
+      "quotaUnlimitedLabel": "Unlimited",
+      "editQuota": "Edit Quota",
+      "saveQuota": "Save"
     }
   },
   "resumeViewer": {
@@ -940,16 +994,8 @@
     }
   },
   "errors": {
-    "generic": "エラーが発生しました。もう一度お試しください。",
-    "networkError": "ネットワークエラー。接続を確認してください。",
-    "unauthorized": "続行するにはサインインしてください。",
-    "notFound": "リクエストされたリソースが見つかりません。",
-    "validationError": "いくつかの入力欄を確認してください。マークされた欄を修正して、もう一度お試しください。",
-    "boundary": {
-      "title": "エラーが発生しました",
-      "description": "予期しない問題が発生しました。ページを再読み込みしてください。問題が続く場合は、お知らせください。",
-      "tryAgain": "再試行",
-      "reloadPage": "ページを再読み込み"
+    "quota": {
+      "exceeded": "Daily AI operation quota exceeded. Please wait until midnight WIB or contact your administrator."
     }
   },
   "a11y": {
@@ -1141,5 +1187,30 @@
       "skillGaps": "スキルギャップ",
       "talkingPoints": "話すべき要点"
     }
+  },
+  "auth": {
+    "loginTitle": "Sign In",
+    "loginSubtitle": "Access your resumes and tailoring",
+    "email": "Email",
+    "emailPlaceholder": "name@example.com",
+    "password": "Password",
+    "passwordPlaceholder": "••••••••",
+    "signInButton": "Sign In",
+    "signingIn": "Signing In...",
+    "invalidCredentials": "Invalid email or password",
+    "welcomeTitle": "Welcome to Resume Matcher",
+    "welcomeSubtitle": "Set your password to activate your account",
+    "resetTitle": "Reset Password",
+    "resetSubtitle": "Enter your new password",
+    "newPassword": "New Password",
+    "confirmPassword": "Confirm Password",
+    "setPasswordButton": "Set Password & Continue",
+    "settingPassword": "Setting Password...",
+    "passwordMinLength": "Password must be at least 8 characters",
+    "passwordsDoNotMatch": "Passwords do not match",
+    "inviteInvalidOrExpired": "This link is invalid or has expired.",
+    "backToLogin": "Back to Sign In",
+    "logout": "Sign Out",
+    "loggingOut": "Signing Out..."
   }
 }

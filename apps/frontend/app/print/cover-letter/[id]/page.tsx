@@ -86,10 +86,7 @@ export default async function PrintCoverLetterPage({ params, searchParams }: Pag
   const locale = resolveLocale(resolvedSearchParams?.lang);
 
   // Fetch cover letter data from API (same pattern as resume)
-  const { coverLetter, personalInfo } = await fetchCoverLetterData(
-    resolvedParams.id,
-    printToken
-  );
+  const { coverLetter, personalInfo } = await fetchCoverLetterData(resolvedParams.id, printToken);
 
   // Standard cover letter margins
   const margins = { top: 25, right: 25, bottom: 25, left: 25 };

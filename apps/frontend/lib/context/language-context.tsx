@@ -124,7 +124,15 @@ export function LanguageProvider({ children }: { children: React.ReactNode }) {
 export function useLanguage() {
   const context = useContext(LanguageContext);
   if (context === undefined) {
-    throw new Error('useLanguage must be used within a LanguageProvider');
+    return {
+      contentLanguage: defaultLocale as SupportedLanguage,
+      uiLanguage: defaultLocale,
+      isLoading: false,
+      setContentLanguage: async () => {},
+      setUiLanguage: () => {},
+      languageNames: localeNames,
+      supportedLanguages: locales,
+    };
   }
   return context;
 }
