@@ -34,32 +34,46 @@ async def get_current_user(request: Request) -> dict[str, Any]:
     ``current_user_id.set()`` modifies the active request context.
     """
     from app.database import db
+    from app.services.print_tokens import print_tokens
 
     token = request.cookies.get(COOKIE_NAME)
-    if not token or not token.strip():
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated.",
-        )
+    session = None
+    if token and token.strip():
+        token_hash = hash_token(token)
+        session = await db.get_session_by_token_hash(token_hash)
+        if session:
+            try:
+                expires_at = datetime.fromisoformat(session["expires_at"])
+                if expires_at <= datetime.now(timezone.utc):
+                    await db.delete_session(token_hash)
+                    session = None
+            except (ValueError, TypeError):
+                session = None
 
-    token_hash = hash_token(token)
-    session = await db.get_session_by_token_hash(token_hash)
     if session is None:
-        raise HTTPException(
-            status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Not authenticated.",
-        )
+        # Fallback to X-Print-Token for headless print rendering (T3.2)
+        print_token = request.headers.get("x-print-token")
+        if print_token and print_token.strip():
+            # Must be GET /api/v1/resumes
+            path = request.url.path
+            is_resumes_get = request.method == "GET" and (
+                path == "/api/v1/resumes" or path == "/resumes"
+            )
+            req_resume_id = request.query_params.get("resume_id")
+            grant = print_tokens.get(print_token.strip())
 
-    # Validate expiration
-    try:
-        expires_at = datetime.fromisoformat(session["expires_at"])
-        if expires_at <= datetime.now(timezone.utc):
-            await db.delete_session(token_hash)
+            if is_resumes_get and grant and req_resume_id == grant.resume_id:
+                user = await db.get_user(grant.user_id)
+                if user is not None and user.get("is_active", False):
+                    current_user_id.set(user["id"])
+                    if user.get("content_language"):
+                        current_content_language.set(user["content_language"])
+                    return user
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
                 detail="Not authenticated.",
             )
-    except (ValueError, TypeError):
+
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail="Not authenticated.",

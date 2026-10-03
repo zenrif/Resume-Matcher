@@ -15,7 +15,9 @@ from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, Upl
 from fastapi.responses import Response
 from pydantic import ValidationError
 
+from app.auth.context import current_user_id
 from app.auth.deps import require_user
+from app.services.print_tokens import print_tokens
 
 from app.ai_limits import MAX_JOB_CHARACTERS, PromptSizeError, require_source_size
 from app.ai_budget import (
@@ -2126,11 +2128,17 @@ async def download_resume_pdf(
         "left": marginLeft,
     }
 
+    uid = current_user_id.get() or resume.get("user_id") or ""
+    token = print_tokens.put(user_id=uid, resume_id=resume_id)
+    url = f"{url}&rt={token}"
+
     # Render PDF with margins applied to every page
     try:
         pdf_bytes = await render_resume_pdf(url, pageSize, margins=pdf_margins)
     except PDFRenderError as e:
         raise HTTPException(status_code=503, detail=str(e))
+    finally:
+        print_tokens.discard(token)
 
     headers = {"Content-Disposition": f'attachment; filename="resume_{resume_id}.pdf"'}
     return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
@@ -2665,6 +2673,10 @@ async def download_cover_letter_pdf(
     if lang:
         url = f"{url}&lang={lang}"
 
+    uid = current_user_id.get() or resume.get("user_id") or ""
+    token = print_tokens.put(user_id=uid, resume_id=resume_id)
+    url = f"{url}&rt={token}"
+
     # Render PDF with cover letter selector
     try:
         pdf_bytes = await render_resume_pdf(
@@ -2672,6 +2684,8 @@ async def download_cover_letter_pdf(
         )
     except PDFRenderError as e:
         raise HTTPException(status_code=503, detail=str(e))
+    finally:
+        print_tokens.discard(token)
 
     headers = {
         "Content-Disposition": f'attachment; filename="cover_letter_{resume_id}.pdf"'
