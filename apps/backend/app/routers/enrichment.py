@@ -11,6 +11,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth.deps import require_user
+from app.auth.quota import consume_ai_quota
 
 from app.ai_limits import MAX_ITEM_WORKERS, PromptSizeError, require_source_size
 from app.ai_budget import (
@@ -146,7 +147,7 @@ def _extract_item_from_resume(processed_data: dict, item_id: str) -> dict:
     return {}
 
 
-@router.post("/analyze/{resume_id}", response_model=AnalysisResponse)
+@router.post("/analyze/{resume_id}", response_model=AnalysisResponse, dependencies=[Depends(consume_ai_quota)])
 async def analyze_resume(resume_id: str) -> AnalysisResponse:
     """Analyze a resume to identify items that need enrichment.
 
@@ -241,7 +242,7 @@ async def analyze_resume(resume_id: str) -> AnalysisResponse:
         )
 
 
-@router.post("/enhance", response_model=EnhancementPreview)
+@router.post("/enhance", response_model=EnhancementPreview, dependencies=[Depends(consume_ai_quota)])
 async def generate_enhancements(request: EnhanceRequest) -> EnhancementPreview:
     """Generate enhanced descriptions from user answers.
 
@@ -596,7 +597,7 @@ async def _regenerate_skills(
     )
 
 
-@router.post("/regenerate", response_model=RegenerateResponse)
+@router.post("/regenerate", response_model=RegenerateResponse, dependencies=[Depends(consume_ai_quota)])
 async def regenerate_items(request: RegenerateRequest) -> RegenerateResponse:
     """Regenerate selected resume items based on user feedback.
 

@@ -8,6 +8,7 @@ from uuid import uuid4
 from fastapi import APIRouter, Depends, HTTPException
 
 from app.auth.deps import require_user
+from app.auth.quota import consume_ai_quota
 from app.ai_budget import AIOperationDeadlineExceeded, AIOperationRoute
 from app.ai_limits import PromptSizeError
 from app.database import MasterResumeLimitError, db
@@ -66,7 +67,7 @@ def _finalize_response(resume: dict[str, Any]) -> ResumeWizardFinalizeResponse:
     )
 
 
-@router.post("/turn", response_model=ResumeWizardTurnResponse)
+@router.post("/turn", response_model=ResumeWizardTurnResponse, dependencies=[Depends(consume_ai_quota)])
 async def resume_wizard_turn(
     request: ResumeWizardTurnRequest,
 ) -> ResumeWizardTurnResponse:
@@ -105,7 +106,7 @@ async def resume_wizard_turn(
         )
 
 
-@router.post("/finalize", response_model=ResumeWizardFinalizeResponse)
+@router.post("/finalize", response_model=ResumeWizardFinalizeResponse, dependencies=[Depends(consume_ai_quota)])
 async def finalize_resume_wizard(
     request: ResumeWizardFinalizeRequest,
 ) -> ResumeWizardFinalizeResponse:

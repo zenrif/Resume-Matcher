@@ -10,6 +10,7 @@ from fastapi.responses import JSONResponse
 
 from app.auth.deps import get_client_ip, require_user
 from app.auth.passwords import dummy_verify, hash_password, verify_password
+from app.auth.quota import current_jakarta_day
 from app.auth.rate_limit import login_rate_limiter
 from app.auth.sessions import COOKIE_NAME, generate_token, hash_token
 from app.config import settings
@@ -112,6 +113,8 @@ async def me(
     user: dict[str, Any] = Depends(require_user),
 ) -> Any:
     """Return the profile of the current authenticated user."""
+    today = current_jakarta_day()
+    ai_used = await db.get_ai_usage_today(user_id=user["id"], day=today)
     return UserMeResponse(
         id=user["id"],
         email=user["email"],
@@ -119,7 +122,7 @@ async def me(
         role=user["role"],
         content_language=user.get("content_language", "id"),
         daily_ai_limit=user.get("daily_ai_limit"),
-        ai_used_today=0,  # Computed in Phase 4
+        ai_used_today=ai_used,
     )
 
 

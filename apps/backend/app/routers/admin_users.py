@@ -151,3 +151,38 @@ async def patch_user(
 
     updated_user = await db.update_user(user["id"], **updates)
     return UserResponse(**(updated_user or user))
+
+
+@router.delete("/{user_id}", status_code=status.HTTP_204_NO_CONTENT)
+async def delete_user(
+    user_id: str,
+    admin: dict[str, Any] = Depends(require_admin),
+) -> None:
+    """Delete a user and all their associated data in a single transaction (admin only).
+
+    Refuses self-delete and deleting the last admin.
+    """
+    if user_id == admin["id"]:
+        raise HTTPException(
+            status_code=status.HTTP_400_BAD_REQUEST,
+            detail="Cannot delete yourself.",
+        )
+
+    target_user = await db.get_user(user_id)
+    if not target_user:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
+        )
+
+    if target_user["role"] == "admin":
+        all_users = await db.list_users()
+        admins = [u for u in all_users if u["role"] == "admin"]
+        if len(admins) <= 1:
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST,
+                detail="Cannot delete the last admin.",
+            )
+
+    await db.delete_user_and_data(user_id)
+

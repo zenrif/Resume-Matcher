@@ -4,9 +4,9 @@ import json
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException, Request
 
-from app.auth.deps import require_user
+from app.auth.deps import require_admin, require_user
 from app.config import settings
 from app.llm import check_llm_health, LLMConfig, resolve_api_key
 from app.schemas import (
@@ -64,7 +64,7 @@ def _effective_api_base(stored: dict) -> str | None:
     """
     return stored.get("api_base") or settings.llm_api_base or None
 
-router = APIRouter(prefix="/config", tags=["Configuration"])
+router = APIRouter(prefix="/config", tags=["Configuration"], dependencies=[Depends(require_user)])
 
 
 def _get_config_path() -> Path:
@@ -113,7 +113,7 @@ async def _log_llm_health_check(config: LLMConfig) -> None:
         )
 
 
-@router.get("/llm-api-key", response_model=LLMConfigResponse)
+@router.get("/llm-api-key", response_model=LLMConfigResponse, dependencies=[Depends(require_admin)])
 async def get_llm_config_endpoint() -> LLMConfigResponse:
     """Get current LLM configuration (API key masked)."""
     stored = _load_config()
@@ -129,7 +129,7 @@ async def get_llm_config_endpoint() -> LLMConfigResponse:
     )
 
 
-@router.put("/llm-api-key", response_model=LLMConfigResponse)
+@router.put("/llm-api-key", response_model=LLMConfigResponse, dependencies=[Depends(require_admin)])
 async def update_llm_config(
     request: LLMConfigRequest,
     background_tasks: BackgroundTasks,
@@ -214,7 +214,7 @@ async def update_llm_config(
     )
 
 
-@router.post("/llm-test")
+@router.post("/llm-test", dependencies=[Depends(require_admin)])
 async def test_llm_connection(request: LLMConfigRequest | None = None) -> dict:
     """Test LLM connection with provided or stored configuration.
 
@@ -269,7 +269,7 @@ async def get_feature_config() -> FeatureConfigResponse:
     )
 
 
-@router.put("/features", response_model=FeatureConfigResponse)
+@router.put("/features", response_model=FeatureConfigResponse, dependencies=[Depends(require_admin)])
 async def update_feature_config(request: FeatureConfigRequest) -> FeatureConfigResponse:
     """Update feature configuration."""
     stored = _load_config()
@@ -392,7 +392,7 @@ async def get_prompt_config() -> PromptConfigResponse:
     )
 
 
-@router.put("/prompts", response_model=PromptConfigResponse)
+@router.put("/prompts", response_model=PromptConfigResponse, dependencies=[Depends(require_admin)])
 async def update_prompt_config(
     request: PromptConfigRequest,
 ) -> PromptConfigResponse:
@@ -441,7 +441,7 @@ async def get_feature_prompts() -> FeaturePromptsResponse:
     )
 
 
-@router.put("/feature-prompts", response_model=FeaturePromptsResponse)
+@router.put("/feature-prompts", response_model=FeaturePromptsResponse, dependencies=[Depends(require_admin)])
 async def update_feature_prompts(
     request: FeaturePromptsRequest,
 ) -> FeaturePromptsResponse:
@@ -521,7 +521,7 @@ def _mask_key_short(key: str | None) -> str | None:
     return "..." + key[-4:]
 
 
-@router.get("/api-keys", response_model=ApiKeyStatusResponse)
+@router.get("/api-keys", response_model=ApiKeyStatusResponse, dependencies=[Depends(require_admin)])
 async def get_api_keys_status() -> ApiKeyStatusResponse:
     """Get status of all configured API keys (masked).
 
@@ -544,7 +544,7 @@ async def get_api_keys_status() -> ApiKeyStatusResponse:
     return ApiKeyStatusResponse(providers=providers)
 
 
-@router.post("/api-keys", response_model=ApiKeysUpdateResponse)
+@router.post("/api-keys", response_model=ApiKeysUpdateResponse, dependencies=[Depends(require_admin)])
 async def update_api_keys(request: ApiKeysUpdateRequest) -> ApiKeysUpdateResponse:
     """Update API keys for one or more providers.
 
@@ -627,7 +627,7 @@ async def update_api_keys(request: ApiKeysUpdateRequest) -> ApiKeysUpdateRespons
     )
 
 
-@router.delete("/api-keys")
+@router.delete("/api-keys", dependencies=[Depends(require_admin)])
 async def delete_all_api_keys(confirm: str | None = None) -> dict:
     """Clear all configured API keys.
 
@@ -653,7 +653,7 @@ async def delete_all_api_keys(confirm: str | None = None) -> dict:
     return {"message": "All API keys have been cleared"}
 
 
-@router.delete("/api-keys/{provider}")
+@router.delete("/api-keys/{provider}", dependencies=[Depends(require_admin)])
 async def delete_api_key(provider: str) -> dict:
     """Delete API key for a specific provider.
 
@@ -676,29 +676,18 @@ async def delete_api_key(provider: str) -> dict:
 
 
 @router.post("/reset")
-async def reset_database_endpoint(request: ResetDatabaseRequest) -> dict:
-    """Reset the database and clear all data.
+async def reset_user_data_endpoint(request: ResetDatabaseRequest) -> dict:
+    """Delete all data belonging to the current user (delete all my data).
 
-    WARNING: This action is irreversible. It will:
-    1. Truncate all database tables (resumes, jobs, improvements)
-    2. Delete all uploaded files
+    WARNING: This action is irreversible. It will delete all resumes, jobs,
+    improvements, tailoring previews, and tracker applications for the caller.
 
     Requires confirmation token for safety.
-
-    Args:
-        request: Request body containing confirmation token
-
-    Returns:
-        Success message
-
-    Note:
-        This is a local-only endpoint for single-user deployments.
-        In production/multi-user scenarios, add proper authentication.
     """
     if request.confirm != "RESET_ALL_DATA":
         raise HTTPException(
             status_code=400,
             detail="Confirmation required. Pass confirm=RESET_ALL_DATA in request body.",
         )
-    await db.reset_database()
-    return {"message": "Database and all data have been reset successfully"}
+    await db.reset_user_data()
+    return {"message": "All user data has been reset successfully"}

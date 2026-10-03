@@ -215,3 +215,14 @@ class Invite(Base):
     created_at: Mapped[str] = mapped_column(String, default=_utcnow_iso, nullable=False)
     expires_at: Mapped[str] = mapped_column(String, nullable=False)
     used_at: Mapped[str | None] = mapped_column(String, nullable=True)
+
+
+class AiUsage(Base):
+    """Daily AI operation counts per user."""
+
+    __tablename__ = "ai_usage"
+
+    user_id: Mapped[str] = mapped_column(String, primary_key=True)
+    day: Mapped[str] = mapped_column(String, primary_key=True)  # YYYY-MM-DD in Asia/Jakarta
+    count: Mapped[int] = mapped_column(Integer, default=0, nullable=False)
+

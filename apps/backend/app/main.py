@@ -153,6 +153,9 @@ async def verify_origin_middleware(request: Request, call_next: Any) -> Response
     return await call_next(request)
 
 
+from app.auth.quota import QuotaExceededError
+
+
 @app.exception_handler(DatabaseBusyError)
 async def database_busy_handler(request: Request, error: DatabaseBusyError) -> JSONResponse:
     logger.warning("Database write contention for %s", request.url.path, exc_info=error)
@@ -160,6 +163,16 @@ async def database_busy_handler(request: Request, error: DatabaseBusyError) -> J
         status_code=503,
         content=operation_error_content(request, "Database is busy. Please retry shortly."),
         headers={"Retry-After": "1"},
+    )
+
+
+@app.exception_handler(QuotaExceededError)
+async def quota_exceeded_handler(request: Request, error: QuotaExceededError) -> JSONResponse:
+    content = operation_error_content(request, str(error.message))
+    content["code"] = "ai_quota_exceeded"
+    return JSONResponse(
+        status_code=status.HTTP_429_TOO_MANY_REQUESTS,
+        content=content,
     )
 
 

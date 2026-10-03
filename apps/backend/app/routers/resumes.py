@@ -17,6 +17,7 @@ from pydantic import ValidationError
 
 from app.auth.context import current_user_id
 from app.auth.deps import require_user
+from app.auth.quota import consume_ai_quota
 from app.services.print_tokens import print_tokens
 
 from app.ai_limits import MAX_JOB_CHARACTERS, PromptSizeError, require_source_size
@@ -950,7 +951,7 @@ async def _claim_processing(
         raise
 
 
-@router.post("/upload", response_model=ResumeUploadResponse)
+@router.post("/upload", response_model=ResumeUploadResponse, dependencies=[Depends(consume_ai_quota)])
 async def upload_resume(
     request: Request, file: UploadFile = File(...)
 ) -> ResumeUploadResponse:
@@ -1191,7 +1192,7 @@ async def get_render_draft(token: str) -> dict[str, Any]:
     return {"data": {"processed_resume": data}}
 
 
-@router.post("/improve/preview", response_model=ImproveResumeResponse)
+@router.post("/improve/preview", response_model=ImproveResumeResponse, dependencies=[Depends(consume_ai_quota)])
 async def improve_resume_preview_endpoint(
     request: ImproveResumeRequest,
 ) -> ImproveResumeResponse:
@@ -1731,7 +1732,7 @@ async def improve_resume_confirm_endpoint(
                 )
 
 
-@router.post("/improve", response_model=ImproveResumeResponse)
+@router.post("/improve", response_model=ImproveResumeResponse, dependencies=[Depends(consume_ai_quota)])
 async def improve_resume_endpoint(
     request: ImproveResumeRequest,
 ) -> ImproveResumeResponse:
@@ -2153,7 +2154,7 @@ async def delete_resume(resume_id: str) -> dict:
     return {"message": "Resume deleted successfully"}
 
 
-@router.post("/{resume_id}/retry-processing", response_model=ResumeUploadResponse)
+@router.post("/{resume_id}/retry-processing", response_model=ResumeUploadResponse, dependencies=[Depends(consume_ai_quota)])
 async def retry_processing(resume_id: str) -> ResumeUploadResponse:
     """Retry AI processing for a failed or stuck resume.
 
@@ -2384,7 +2385,9 @@ async def duplicate_resume(resume_id: str) -> DuplicateResumeResponse:
 
 
 @router.post(
-    "/{resume_id}/generate-cover-letter", response_model=GenerateContentResponse
+    "/{resume_id}/generate-cover-letter",
+    response_model=GenerateContentResponse,
+    dependencies=[Depends(consume_ai_quota)],
 )
 async def generate_cover_letter_endpoint(resume_id: str) -> GenerateContentResponse:
     """Generate a cover letter on-demand for an existing tailored resume.
@@ -2459,7 +2462,11 @@ async def generate_cover_letter_endpoint(resume_id: str) -> GenerateContentRespo
     )
 
 
-@router.post("/{resume_id}/generate-outreach", response_model=GenerateContentResponse)
+@router.post(
+    "/{resume_id}/generate-outreach",
+    response_model=GenerateContentResponse,
+    dependencies=[Depends(consume_ai_quota)],
+)
 async def generate_outreach_endpoint(resume_id: str) -> GenerateContentResponse:
     """Generate an outreach message on-demand for an existing tailored resume.
 
@@ -2536,6 +2543,7 @@ async def generate_outreach_endpoint(resume_id: str) -> GenerateContentResponse:
 @router.post(
     "/{resume_id}/generate-interview-prep",
     response_model=GenerateInterviewPrepResponse,
+    dependencies=[Depends(consume_ai_quota)],
 )
 async def generate_interview_prep_endpoint(
     resume_id: str,

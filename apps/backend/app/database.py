@@ -30,6 +30,7 @@ from app.auth.context import NoUserContextError, current_user_id
 from app.config import settings
 from app.db_engine import init_models_sync, make_async_engine, make_sync_engine
 from app.models import (
+    AiUsage,
     ApiKey,
     Application,
     AuthSession,
@@ -1711,6 +1712,66 @@ class Database:
             res = await session.execute(stmt)
             await session.commit()
             return bool(res.rowcount)
+
+    # -- AI Usage & Deletion operations --------------------------------------
+
+    async def increment_ai_usage_bounded(
+        self, *, user_id: str, day: str, limit: int
+    ) -> bool:
+        """Atomically increment the AI usage count if below the daily limit.
+
+        Uses atomic upsert so concurrent requests cannot exceed the limit.
+        Returns True if incremented, False if limit would be exceeded.
+        """
+        if limit <= 0:
+            return False
+
+        query = text(
+            "INSERT INTO ai_usage (user_id, day, count) VALUES (:u, :d, 1) "
+            "ON CONFLICT (user_id, day) DO UPDATE SET count = count + 1 "
+            "WHERE count < :limit "
+            "RETURNING count;"
+        )
+        async with self._write_session() as session:
+            result = await session.execute(query, {"u": user_id, "d": day, "limit": limit})
+            row = result.fetchone()
+            await session.commit()
+            return row is not None
+
+    async def increment_ai_usage_unlimited(self, *, user_id: str, day: str) -> int:
+        """Increment AI usage count without an upper bound."""
+        query = text(
+            "INSERT INTO ai_usage (user_id, day, count) VALUES (:u, :d, 1) "
+            "ON CONFLICT (user_id, day) DO UPDATE SET count = count + 1 "
+            "RETURNING count;"
+        )
+        async with self._write_session() as session:
+            result = await session.execute(query, {"u": user_id, "d": day})
+            row = result.fetchone()
+            await session.commit()
+            return int(row[0]) if row else 1
+
+    async def get_ai_usage_today(self, *, user_id: str, day: str) -> int:
+        """Get the number of AI operations consumed today by the user."""
+        async with self._session() as session:
+            res = await session.scalar(
+                select(AiUsage.count).where(AiUsage.user_id == user_id, AiUsage.day == day)
+            )
+            return int(res or 0)
+
+    async def delete_user_and_data(self, user_id: str) -> None:
+        """Delete a user and all their associated data in a single transaction."""
+        async with self._write_session() as session:
+            await session.execute(delete(Resume).where(Resume.user_id == user_id))
+            await session.execute(delete(Job).where(Job.user_id == user_id))
+            await session.execute(delete(Improvement).where(Improvement.user_id == user_id))
+            await session.execute(delete(TailoringPreview).where(TailoringPreview.user_id == user_id))
+            await session.execute(delete(Application).where(Application.user_id == user_id))
+            await session.execute(delete(AiUsage).where(AiUsage.user_id == user_id))
+            await session.execute(delete(AuthSession).where(AuthSession.user_id == user_id))
+            await session.execute(delete(Invite).where(Invite.user_id == user_id))
+            await session.execute(delete(User).where(User.id == user_id))
+            await session.commit()
 
 
 # Global database instance
