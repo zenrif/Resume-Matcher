@@ -59,6 +59,7 @@ async def create_or_reactivate_admin(email: str, display_name: str | None = None
         purpose=purpose,
         expires_at=expires_at,
     )
+    await db.assign_orphan_rows(user_id)
 
     base_url = settings.effective_public_base_url
     return f"{base_url}/invite/{token}"

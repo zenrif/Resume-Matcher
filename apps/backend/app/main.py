@@ -95,6 +95,7 @@ async def lifespan(app: FastAPI) -> AsyncIterator[None]:
                 purpose="invite",
                 expires_at=expires_at,
             )
+            await db.assign_orphan_rows(admin_id)
             logger.info(
                 "Bootstrap admin invite: %s/invite/%s",
                 settings.effective_public_base_url,

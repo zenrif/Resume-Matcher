@@ -33,11 +33,12 @@ class Resume(Base):
     __tablename__ = "resumes"
 
     resume_id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True, default=None)
     content: Mapped[str] = mapped_column(Text)
     content_type: Mapped[str] = mapped_column(String, default="md")
     filename: Mapped[str | None] = mapped_column(String, nullable=True)
     is_master: Mapped[bool] = mapped_column(Boolean, default=False)
-    # Exactly one master is the default tailoring source (enforced by the partial
+    # Exactly one master per user is the default tailoring source (enforced by the partial
     # unique index below plus Database invariants: default implies is_master).
     is_default_master: Mapped[bool] = mapped_column(Boolean, default=False, nullable=False)
     parent_id: Mapped[str | None] = mapped_column(String, nullable=True)
@@ -56,9 +57,10 @@ class Resume(Base):
     updated_at: Mapped[str] = mapped_column(String, default=_utcnow_iso)
 
     __table_args__ = (
-        # Many masters (career tracks) may exist; at most one is the default.
+        # Many masters (career tracks) may exist; at most one per user is the default.
         Index(
-            "ux_resumes_single_default_master",
+            "ux_resumes_default_master_per_user",
+            "user_id",
             "is_default_master",
             unique=True,
             sqlite_where=text("is_default_master = 1"),
@@ -79,6 +81,7 @@ class Job(Base):
     __tablename__ = "jobs"
 
     job_id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True, default=None)
     content: Mapped[str] = mapped_column(Text)
     resume_id: Mapped[str | None] = mapped_column(String, nullable=True)
     created_at: Mapped[str] = mapped_column(String, default=_utcnow_iso)
@@ -91,6 +94,7 @@ class Improvement(Base):
     __tablename__ = "improvements"
 
     request_id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True, default=None)
     original_resume_id: Mapped[str] = mapped_column(String)
     tailored_resume_id: Mapped[str] = mapped_column(String, index=True)
     job_id: Mapped[str] = mapped_column(String)
@@ -109,6 +113,7 @@ class TailoringPreview(Base):
     source_data: Mapped[dict[str, Any] | None] = mapped_column(JSON, nullable=True)
 
     preview_id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True, default=None)
     source_id: Mapped[str] = mapped_column(String, index=True)
     job_id: Mapped[str] = mapped_column(String, index=True)
     payload_hash: Mapped[str] = mapped_column(String)
@@ -135,6 +140,7 @@ class Application(Base):
     )
 
     application_id: Mapped[str] = mapped_column(String, primary_key=True)
+    user_id: Mapped[str | None] = mapped_column(String, nullable=True, index=True, default=None)
     job_id: Mapped[str] = mapped_column(String, index=True)
     # The applied/tailored resume shown in the modal and opened by "Edit".
     resume_id: Mapped[str] = mapped_column(String, index=True)

@@ -70,6 +70,10 @@ def load_config() -> dict[str, Any]:
 
 
 def get_content_language() -> str:
-    """Get configured content language from cached config."""
+    """Get configured content language from active user context or cached config."""
+    from app.auth.context import current_content_language
+    lang = current_content_language.get()
+    if lang:
+        return lang
     config = load_config()
     return config.get("content_language", config.get("language", "en"))

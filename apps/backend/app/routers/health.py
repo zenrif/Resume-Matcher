@@ -2,8 +2,9 @@
 
 import logging
 
-from fastapi import APIRouter
+from fastapi import APIRouter, Depends
 
+from app.auth.deps import require_user
 from app.database import db
 from app.llm import check_llm_health, get_llm_config
 from app.schemas import HealthResponse, StatusResponse
@@ -31,7 +32,7 @@ async def health_check() -> HealthResponse:
     return HealthResponse(status="healthy")
 
 
-@router.get("/status", response_model=StatusResponse)
+@router.get("/status", response_model=StatusResponse, dependencies=[Depends(require_user)])
 async def get_status() -> StatusResponse:
     """Get comprehensive application status.
 

@@ -3,8 +3,9 @@
 import logging
 from typing import Any
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth.deps import require_user
 from app.database import DatabaseBusyError, db
 from app.services.improver import extract_job_keywords
 from app.schemas import (
@@ -21,7 +22,11 @@ from app.schemas import (
 
 logger = logging.getLogger(__name__)
 
-router = APIRouter(prefix="/applications", tags=["Application Tracker"])
+router = APIRouter(
+    prefix="/applications",
+    tags=["Application Tracker"],
+    dependencies=[Depends(require_user)],
+)
 
 
 def _group_by_status(applications: list[dict[str, Any]]) -> dict[str, list[ApplicationResponse]]:

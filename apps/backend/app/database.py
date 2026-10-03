@@ -26,6 +26,7 @@ from sqlalchemy.exc import IntegrityError, OperationalError
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from sqlalchemy.orm import Session, sessionmaker
 
+from app.auth.context import NoUserContextError, current_user_id
 from app.config import settings
 from app.db_engine import init_models_sync, make_async_engine, make_sync_engine
 from app.models import (
@@ -113,17 +114,48 @@ def _now() -> str:
     return datetime.now(timezone.utc).isoformat()
 
 
+class _ActingAsContext:
+    def __init__(self, user_id: str) -> None:
+        self.user_id = user_id
+        self._token = None
+
+    def __enter__(self) -> None:
+        self._token = current_user_id.set(self.user_id)
+
+    def __exit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        if self._token is not None:
+            current_user_id.reset(self._token)
+
+    async def __aenter__(self) -> None:
+        self.__enter__()
+
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+        self.__exit__(exc_type, exc_val, exc_tb)
+
+
 class Database:
     """Async SQLAlchemy facade for resume matcher data."""
 
-    def __init__(self, db_path: Path | None = None):
+    def __init__(self, db_path: Path | None = None, fallback_user_id: str | None = None):
         self.db_path = db_path or settings.sqlite_path
         self.db_path.parent.mkdir(parents=True, exist_ok=True)
+        self._fallback_user_id = fallback_user_id  # ONLY for tests/scripts; production db has None
         self._async_engine = None
         self._async_session_factory: async_sessionmaker[AsyncSession] | None = None
         self._sync_engine = None
         self._sync_session_factory: sessionmaker[Session] | None = None
         self._initialized = False
+
+    def _uid(self) -> str:
+        """Return the current user ID or raise NoUserContextError if not scoped."""
+        uid = current_user_id.get() or self._fallback_user_id
+        if uid is None:
+            raise NoUserContextError("DB access without user scope")
+        return uid
+
+    def acting_as(self, user_id: str) -> _ActingAsContext:
+        """Temporarily execute database operations in the context of user_id (supports with and async with)."""
+        return _ActingAsContext(user_id)
 
     # -- engine / session plumbing ------------------------------------------
 
@@ -198,6 +230,7 @@ class Database:
     def _resume_to_dict(row: Resume) -> dict[str, Any]:
         doc: dict[str, Any] = {
             "resume_id": row.resume_id,
+            "user_id": row.user_id,
             "content": row.content,
             "content_type": row.content_type,
             "filename": row.filename,
@@ -222,6 +255,7 @@ class Database:
     def _job_to_dict(row: Job) -> dict[str, Any]:
         doc: dict[str, Any] = {
             "job_id": row.job_id,
+            "user_id": row.user_id,
             "content": row.content,
             "resume_id": row.resume_id,
             "created_at": row.created_at,
@@ -235,6 +269,7 @@ class Database:
     def _improvement_to_dict(row: Improvement) -> dict[str, Any]:
         return {
             "request_id": row.request_id,
+            "user_id": row.user_id,
             "original_resume_id": row.original_resume_id,
             "tailored_resume_id": row.tailored_resume_id,
             "job_id": row.job_id,
@@ -246,6 +281,7 @@ class Database:
     def _application_to_dict(row: Application) -> dict[str, Any]:
         return {
             "application_id": row.application_id,
+            "user_id": row.user_id,
             "job_id": row.job_id,
             "resume_id": row.resume_id,
             "master_resume_id": row.master_resume_id,
@@ -301,11 +337,12 @@ class Database:
             await session.commit()
         return self._resume_to_dict(row)
 
-    @staticmethod
-    def _new_resume(**values: Any) -> Resume:
+    def _new_resume(self, **values: Any) -> Resume:
         """Construct a resume row for standalone or compound transactions."""
         now = _now()
-        return Resume(resume_id=str(uuid4()), created_at=now, updated_at=now, **values)
+        uid = values.pop("user_id", None) or self._uid()
+        rid = values.pop("resume_id", None) or str(uuid4())
+        return Resume(resume_id=rid, user_id=uid, created_at=now, updated_at=now, **values)
 
     async def create_resume_atomic_master(
         self,
@@ -320,6 +357,9 @@ class Database:
         title: str | None = None,
         interview_prep: str | None = None,
         *,
+        resume_id: str | None = None,
+        is_master: bool = True,
+        is_default_master: bool | None = None,
         take_over_stuck_default: bool = True,
         replay_if: Callable[[dict[str, Any]], bool] | None = None,
     ) -> dict[str, Any]:
@@ -334,11 +374,12 @@ class Database:
         written; the check runs inside the write transaction, so concurrent
         identical requests cannot both insert.
         """
+        uid = self._uid()
         async with self._write_session() as session:
             masters = (
                 await session.execute(
                     select(Resume)
-                    .where(Resume.is_master.is_(True))
+                    .where(Resume.user_id == uid, Resume.is_master.is_(True))
                     .order_by(Resume.created_at)
                 )
             ).scalars().all()
@@ -352,7 +393,7 @@ class Database:
                     f"Master resume limit reached ({MAX_MASTER_RESUMES})"
                 )
             current_default = next((m for m in masters if m.is_default_master), None)
-            is_default = current_default is None
+            is_def = current_default is None
             if (
                 take_over_stuck_default
                 and current_default is not None
@@ -362,13 +403,16 @@ class Database:
                 # Release the partial unique-index slot within this transaction.
                 # An insertion failure still rolls this demotion back.
                 await session.flush()
-                is_default = True
+                is_def = True
+            if is_default_master is not None:
+                is_def = is_default_master
             row = self._new_resume(
+                resume_id=resume_id,
                 content=content,
                 content_type=content_type,
                 filename=filename,
-                is_master=True,
-                is_default_master=is_default,
+                is_master=is_master,
+                is_default_master=is_def,
                 processed_data=processed_data,
                 processing_status=processing_status,
                 cover_letter=cover_letter,
@@ -385,14 +429,16 @@ class Database:
         """Get resume by ID."""
         async with self._session() as session:
             row = await session.get(Resume, resume_id)
-            return self._resume_to_dict(row) if row else None
+            if row is None or row.user_id != self._uid():
+                return None
+            return self._resume_to_dict(row)
 
     async def get_master_resume(self) -> dict[str, Any] | None:
         """Get the default master resume (earliest master as a fallback)."""
         async with self._session() as session:
             result = await session.execute(
                 select(Resume)
-                .where(Resume.is_master.is_(True))
+                .where(Resume.user_id == self._uid(), Resume.is_master.is_(True))
                 .order_by(Resume.is_default_master.desc(), Resume.created_at)
             )
             row = result.scalars().first()
@@ -402,7 +448,9 @@ class Database:
         """List every master track, oldest first."""
         async with self._session() as session:
             result = await session.execute(
-                select(Resume).where(Resume.is_master.is_(True)).order_by(Resume.created_at)
+                select(Resume)
+                .where(Resume.user_id == self._uid(), Resume.is_master.is_(True))
+                .order_by(Resume.created_at)
             )
             return [self._resume_to_dict(row) for row in result.scalars().all()]
 
@@ -418,7 +466,7 @@ class Database:
         """
         async with self._write_session() as session:
             row = await session.get(Resume, resume_id)
-            if row is None:
+            if row is None or row.user_id != self._uid():
                 raise ResumeNotFoundError(resume_id)
             for key, value in updates.items():
                 if hasattr(row, key):
@@ -442,6 +490,7 @@ class Database:
         structured content empty. ``None`` means a concurrent completion made
         the row ineligible; a missing row raises ``ResumeNotFoundError``.
         """
+        uid = self._uid()
         token = str(uuid4())
         eligible = Resume.processing_status.in_(("failed", "processing"))
         if allow_ready_at is not None:
@@ -456,7 +505,7 @@ class Database:
         async with self._write_session() as session:
             result = await session.execute(
                 update(Resume)
-                .where(Resume.resume_id == resume_id, eligible)
+                .where(Resume.resume_id == resume_id, Resume.user_id == uid, eligible)
                 .values(
                     processing_status="processing",
                     processing_token=token,
@@ -468,7 +517,7 @@ class Database:
                 return token
 
             exists = await session.scalar(
-                select(Resume.resume_id).where(Resume.resume_id == resume_id)
+                select(Resume.resume_id).where(Resume.resume_id == resume_id, Resume.user_id == uid)
             )
             if exists is None:
                 raise ResumeNotFoundError(resume_id)
@@ -485,6 +534,7 @@ class Database:
         """Finish an owned attempt, or retire an unclaimed row with ``None``."""
         if token is None and processing_status != "failed":
             raise ValueError("Ready processing requires an ownership token")
+        uid = self._uid()
         values: dict[str, Any] = {
             "processing_status": processing_status,
             "processing_token": None,
@@ -499,6 +549,7 @@ class Database:
                 update(Resume)
                 .where(
                     Resume.resume_id == resume_id,
+                    Resume.user_id == uid,
                     Resume.processing_token == token,
                     Resume.processing_status == "processing",
                 )
@@ -509,20 +560,22 @@ class Database:
                 return "committed"
 
             exists = await session.scalar(
-                select(Resume.resume_id).where(Resume.resume_id == resume_id)
+                select(Resume.resume_id).where(Resume.resume_id == resume_id, Resume.user_id == uid)
             )
             return "stale" if exists is not None else "missing"
 
     async def delete_resume(self, resume_id: str) -> bool:
         """Delete resume by ID."""
+        uid = self._uid()
         async with self._write_session() as session:
             row = await session.get(Resume, resume_id)
-            if row is None:
+            if row is None or row.user_id != uid:
                 return False
             # Keep a content-free consumed marker for deleted results so retries
             # cannot recreate them, while removing their cached personal data.
             previews = await session.execute(
                 select(TailoringPreview).where(
+                    TailoringPreview.user_id == uid,
                     TailoringPreview.result_resume_id == resume_id,
                 )
             )
@@ -530,7 +583,10 @@ class Database:
                 preview.response_data = None
                 preview.source_data = None
             await session.execute(
-                delete(TailoringPreview).where(TailoringPreview.source_id == resume_id)
+                delete(TailoringPreview).where(
+                    TailoringPreview.user_id == uid,
+                    TailoringPreview.source_id == resume_id,
+                )
             )
             was_default = row.is_default_master
             await session.delete(row)
@@ -539,7 +595,7 @@ class Database:
                 successor = (
                     await session.execute(
                         select(Resume)
-                        .where(Resume.is_master.is_(True))
+                        .where(Resume.user_id == uid, Resume.is_master.is_(True))
                         .order_by(Resume.created_at)
                         .limit(1)
                     )
@@ -550,20 +606,23 @@ class Database:
             return True
 
     async def list_resumes(self) -> list[dict[str, Any]]:
-        """List all resumes."""
+        """List all resumes for the current user."""
         async with self._session() as session:
-            result = await session.execute(select(Resume).order_by(Resume.created_at))
+            result = await session.execute(
+                select(Resume).where(Resume.user_id == self._uid()).order_by(Resume.created_at)
+            )
             return [self._resume_to_dict(row) for row in result.scalars().all()]
 
     async def set_default_master_resume(self, resume_id: str) -> bool:
         """Make an existing master the default; False if missing or not a master."""
+        uid = self._uid()
         async with self._write_session() as session:
             target = await session.get(Resume, resume_id)
-            if target is None or not target.is_master:
+            if target is None or target.user_id != uid or not target.is_master:
                 logger.warning("Cannot set default master: %s is not a master", resume_id)
                 return False
             current = await session.execute(
-                select(Resume).where(Resume.is_default_master.is_(True))
+                select(Resume).where(Resume.user_id == uid, Resume.is_default_master.is_(True))
             )
             for row in current.scalars().all():
                 if row.resume_id != resume_id:
@@ -584,9 +643,11 @@ class Database:
         self, contents: list[str], resume_id: str | None = None
     ) -> list[dict[str, Any]]:
         """Persist a validated job-description batch atomically, in input order."""
+        uid = self._uid()
         rows = [
             Job(
                 job_id=str(uuid4()),
+                user_id=uid,
                 content=content,
                 resume_id=resume_id,
                 created_at=_now(),
@@ -603,7 +664,9 @@ class Database:
         """Get job by ID (dynamic fields flattened to top level)."""
         async with self._session() as session:
             row = await session.get(Job, job_id)
-            return self._job_to_dict(row) if row else None
+            if row is None or row.user_id != self._uid():
+                return None
+            return self._job_to_dict(row)
 
     async def update_job(
         self, job_id: str, updates: dict[str, Any]
@@ -617,7 +680,7 @@ class Database:
         """
         async with self._write_session() as session:
             row = await session.get(Job, job_id)
-            if row is None:
+            if row is None or row.user_id != self._uid():
                 return None
             meta = dict(row.metadata_json or {})
             for key, value in updates.items():
@@ -632,12 +695,16 @@ class Database:
 
     async def delete_job(self, job_id: str) -> bool:
         """Delete a job by ID (used to clean up an orphaned manual-add job)."""
+        uid = self._uid()
         async with self._write_session() as session:
             row = await session.get(Job, job_id)
-            if row is None:
+            if row is None or row.user_id != uid:
                 return False
             await session.execute(
-                delete(TailoringPreview).where(TailoringPreview.job_id == job_id)
+                delete(TailoringPreview).where(
+                    TailoringPreview.user_id == uid,
+                    TailoringPreview.job_id == job_id,
+                )
             )
             await session.delete(row)
             await session.commit()
@@ -654,7 +721,9 @@ class Database:
         job = await session.get(Job, preview.job_id)
         if (
             source is None
+            or (preview.user_id is not None and source.user_id != preview.user_id)
             or job is None
+            or (preview.user_id is not None and job.user_id != preview.user_id)
             or resume_fingerprint(
                 source.content, source.processed_data, source.original_markdown
             )
@@ -680,8 +749,10 @@ class Database:
     ) -> dict[str, str]:
         """Register the exact input/output snapshot before acknowledging preview."""
         now = _now()
+        uid = self._uid()
         row = TailoringPreview(
             preview_id=str(uuid4()),
+            user_id=uid,
             improvements=copy.deepcopy(improvements or []),
             source_data=copy.deepcopy(source_data),
             source_id=source_id,
@@ -698,6 +769,7 @@ class Database:
             await self._validate_preview_inputs(session, row)
             await session.execute(
                 delete(TailoringPreview).where(
+                    TailoringPreview.user_id == uid,
                     TailoringPreview.expires_at <= now,
                     TailoringPreview.result_resume_id.is_(None),
                     or_(
@@ -707,7 +779,7 @@ class Database:
                 )
             )
             job = await session.get(Job, job_id)
-            assert job is not None  # Validated in the same reserved transaction.
+            assert job is not None and job.user_id == uid  # Validated in the same reserved transaction.
             metadata = dict(job.metadata_json or {})
             hashes = metadata.get("preview_hashes")
             hashes = dict(hashes) if isinstance(hashes, dict) else {}
@@ -732,15 +804,19 @@ class Database:
         lease_seconds: int,
     ) -> PreviewClaim:
         """Claim once across workers; committed retries bypass generation."""
+        uid = self._uid()
         async with self._write_session() as session:
             if preview_id:
                 row = await session.get(TailoringPreview, preview_id)
+                if row is not None and row.user_id != uid:
+                    row = None
             else:
                 # Compatibility for clients that omit the new operation ID.
                 row = (
                     await session.execute(
                         select(TailoringPreview)
                         .where(
+                            TailoringPreview.user_id == uid,
                             TailoringPreview.source_id == source_id,
                             TailoringPreview.job_id == job_id,
                             TailoringPreview.payload_hash == payload_hash,
@@ -763,9 +839,11 @@ class Database:
                     "Invalid improved resume data. Please retry preview."
                 )
             if row.result_resume_id is not None:
+                result_resume = await session.get(Resume, row.result_resume_id)
                 if (
                     row.response_data is None
-                    or await session.get(Resume, row.result_resume_id) is None
+                    or result_resume is None
+                    or result_resume.user_id != uid
                 ):
                     raise PreviewConflictError(
                         "Confirmed resume was deleted. Please retry preview."
@@ -797,9 +875,10 @@ class Database:
         """Release only this request's uncommitted claim, including on cancellation."""
         if not claim.token:
             return
+        uid = self._uid()
         async with self._write_session() as session:
             row = await session.get(TailoringPreview, claim.preview_id)
-            if row is not None and claim.token and row.claim_token == claim.token:
+            if row is not None and row.user_id == uid and claim.token and row.claim_token == claim.token:
                 row.claim_token = None
                 row.claim_expires_at = None
                 await session.commit()
@@ -813,11 +892,13 @@ class Database:
         improvements: list[dict[str, Any]],
     ) -> dict[str, Any]:
         """Commit resume, required relation and replay snapshot atomically."""
+        uid = self._uid()
         async with self._write_session() as session:
             preview = await session.get(TailoringPreview, claim.preview_id)
             now = _now()
             if (
                 preview is None
+                or preview.user_id != uid
                 or not claim.token
                 or preview.claim_token != claim.token
                 or not preview.claim_expires_at
@@ -839,6 +920,7 @@ class Database:
             session.add(
                 Improvement(
                     request_id=result["request_id"],
+                    user_id=uid,
                     original_resume_id=preview.source_id,
                     tailored_resume_id=row.resume_id,
                     job_id=preview.job_id,
@@ -867,6 +949,7 @@ class Database:
         improvements: list[dict[str, Any]],
     ) -> dict[str, Any]:
         """Commit a direct tailoring result and its required relation together."""
+        uid = self._uid()
         row = self._new_resume(**resume_fields)
         async with self._write_session() as session:
             session.add(row)
@@ -874,6 +957,7 @@ class Database:
             session.add(
                 Improvement(
                     request_id=request_id,
+                    user_id=uid,
                     original_resume_id=original_resume_id,
                     tailored_resume_id=row.resume_id,
                     job_id=job_id,
@@ -894,10 +978,12 @@ class Database:
         """Create an improvement result entry."""
         request_id = str(uuid4())
         now = _now()
+        uid = self._uid()
         async with self._write_session() as session:
             session.add(
                 Improvement(
                     request_id=request_id,
+                    user_id=uid,
                     original_resume_id=original_resume_id,
                     tailored_resume_id=tailored_resume_id,
                     job_id=job_id,
@@ -922,7 +1008,8 @@ class Database:
         async with self._session() as session:
             result = await session.execute(
                 select(Improvement).where(
-                    Improvement.tailored_resume_id == tailored_resume_id
+                    Improvement.user_id == self._uid(),
+                    Improvement.tailored_resume_id == tailored_resume_id,
                 )
             )
             row = result.scalars().first()
@@ -930,19 +1017,25 @@ class Database:
 
     # -- Application (tracker) operations -----------------------------------
 
-    async def _next_position(self, session: AsyncSession, status: str) -> int:
+    async def _next_position(
+        self, session: AsyncSession, status: str, user_id: str | None = None
+    ) -> int:
+        uid = user_id or self._uid()
         result = await session.execute(
             select(func.count())
             .select_from(Application)
-            .where(Application.status == status)
+            .where(Application.user_id == uid, Application.status == status)
         )
         return int(result.scalar() or 0)
 
-    async def _renumber(self, session: AsyncSession, status: str) -> None:
+    async def _renumber(
+        self, session: AsyncSession, status: str, user_id: str | None = None
+    ) -> None:
         """Renumber a column's positions to a contiguous 0..n-1 sequence."""
+        uid = user_id or self._uid()
         result = await session.execute(
             select(Application)
-            .where(Application.status == status)
+            .where(Application.user_id == uid, Application.status == status)
             .order_by(Application.position, Application.created_at)
         )
         for index, row in enumerate(result.scalars().all()):
@@ -961,14 +1054,17 @@ class Database:
         role: str | None = None,
         applied_at: str | None = None,
         notes: str | None = None,
+        user_id: str | None = None,
     ) -> Application:
         """Stage one card with shared date and ordering rules, without committing."""
         now = _now()
+        uid = user_id or self._uid()
         if applied_at is None and status != "saved":
             applied_at = now
-        position = await self._next_position(session, status)
+        position = await self._next_position(session, status, user_id=uid)
         row = Application(
             application_id=str(uuid4()),
+            user_id=uid,
             job_id=job_id,
             resume_id=resume_id,
             master_resume_id=master_resume_id,
@@ -995,9 +1091,11 @@ class Database:
         notes: str | None = None,
     ) -> dict[str, Any]:
         """Commit a pasted job and its tracker card together, or roll back both."""
+        uid = self._uid()
         async with self._write_session() as session:
             job = Job(
                 job_id=str(uuid4()),
+                user_id=uid,
                 content=content,
                 resume_id=resume_id,
                 created_at=_now(),
@@ -1015,6 +1113,7 @@ class Database:
                 company=company,
                 role=role,
                 notes=notes,
+                user_id=uid,
             )
             await session.commit()
             return self._application_to_dict(row)
@@ -1035,18 +1134,25 @@ class Database:
         If a card for the same job+resume already exists it is returned as-is
         (survives double-submit / retried confirms).
         """
+        uid = self._uid()
         # A replay needs only a read. Recheck under the reservation before an
         # insert so concurrent new cards still share the position allocation.
         async with self._session() as session:
-            found = await session.scalar(select(Application).where(
-                Application.job_id == job_id, Application.resume_id == resume_id
-            ))
+            found = await session.scalar(
+                select(Application).where(
+                    Application.user_id == uid,
+                    Application.job_id == job_id,
+                    Application.resume_id == resume_id,
+                )
+            )
             if found is not None:
                 return self._application_to_dict(found)
         async with self._write_session() as session:
             existing = await session.execute(
                 select(Application).where(
-                    Application.job_id == job_id, Application.resume_id == resume_id
+                    Application.user_id == uid,
+                    Application.job_id == job_id,
+                    Application.resume_id == resume_id,
                 )
             )
             found = existing.scalars().first()
@@ -1063,6 +1169,7 @@ class Database:
                 role=role,
                 applied_at=applied_at,
                 notes=notes,
+                user_id=uid,
             )
             try:
                 await session.commit()
@@ -1072,6 +1179,7 @@ class Database:
                 await session.rollback()
                 dup = await session.execute(
                     select(Application).where(
+                        Application.user_id == uid,
                         Application.job_id == job_id,
                         Application.resume_id == resume_id,
                     )
@@ -1090,9 +1198,10 @@ class Database:
     async def list_applications(
         self, status: str | None = None
     ) -> list[dict[str, Any]]:
-        """List applications ordered by (status, position)."""
+        """List applications ordered by (status, position) for the current user."""
+        uid = self._uid()
         async with self._session() as session:
-            stmt = select(Application)
+            stmt = select(Application).where(Application.user_id == uid)
             if status is not None:
                 stmt = stmt.where(Application.status == status)
             stmt = stmt.order_by(Application.status, Application.position)
@@ -1103,7 +1212,9 @@ class Database:
         """Get an application by ID."""
         async with self._session() as session:
             row = await session.get(Application, application_id)
-            return self._application_to_dict(row) if row else None
+            if row is None or row.user_id != self._uid():
+                return None
+            return self._application_to_dict(row)
 
     async def update_application(
         self, application_id: str, updates: dict[str, Any]
@@ -1114,9 +1225,10 @@ class Database:
         new) ``status`` column; siblings are renumbered server-side so the
         column stays a contiguous 0..n-1 sequence.
         """
+        uid = self._uid()
         async with self._write_session() as session:
             row = await session.get(Application, application_id)
-            if row is None:
+            if row is None or row.user_id != uid:
                 return None
 
             old_status = row.status
@@ -1142,11 +1254,12 @@ class Database:
                 row.position = 10_000_000
                 await session.flush()
                 if old_status != new_status:
-                    await self._renumber(session, old_status)
+                    await self._renumber(session, old_status, user_id=uid)
                 # Renumber the target column excluding this row, then splice in.
                 siblings = await session.execute(
                     select(Application)
                     .where(
+                        Application.user_id == uid,
                         Application.status == new_status,
                         Application.application_id != application_id,
                     )
@@ -1169,12 +1282,13 @@ class Database:
         self, application_ids: list[str], status: str
     ) -> int:
         """Move many applications to the end of ``status``. Returns count moved."""
+        uid = self._uid()
         moved = 0
         async with self._write_session() as session:
             affected_old: set[str] = set()
             for application_id in application_ids:
                 row = await session.get(Application, application_id)
-                if row is None:
+                if row is None or row.user_id != uid:
                     continue
                 affected_old.add(row.status)
                 if (
@@ -1189,39 +1303,41 @@ class Database:
                 moved += 1
             await session.flush()
             for old_status in affected_old - {status}:
-                await self._renumber(session, old_status)
-            await self._renumber(session, status)
+                await self._renumber(session, old_status, user_id=uid)
+            await self._renumber(session, status, user_id=uid)
             await session.commit()
         return moved
 
     async def delete_application(self, application_id: str) -> bool:
         """Delete an application; renumber its column."""
+        uid = self._uid()
         async with self._write_session() as session:
             row = await session.get(Application, application_id)
-            if row is None:
+            if row is None or row.user_id != uid:
                 return False
             status = row.status
             await session.delete(row)
             await session.flush()
-            await self._renumber(session, status)
+            await self._renumber(session, status, user_id=uid)
             await session.commit()
             return True
 
     async def bulk_delete_applications(self, application_ids: list[str]) -> int:
         """Delete many applications; renumber affected columns. Returns count."""
+        uid = self._uid()
         deleted = 0
         async with self._write_session() as session:
             affected: set[str] = set()
             for application_id in application_ids:
                 row = await session.get(Application, application_id)
-                if row is None:
+                if row is None or row.user_id != uid:
                     continue
                 affected.add(row.status)
                 await session.delete(row)
                 deleted += 1
             await session.flush()
             for status in affected:
-                await self._renumber(session, status)
+                await self._renumber(session, status, user_id=uid)
             await session.commit()
         return deleted
 
@@ -1279,15 +1395,22 @@ class Database:
     # -- Stats / maintenance ------------------------------------------------
 
     async def get_stats(self) -> dict[str, Any]:
-        """Get database statistics."""
+        """Get database statistics for the active user context."""
+        uid = self._uid()
         async with self._session() as session:
-            resumes = await session.scalar(select(func.count()).select_from(Resume))
-            jobs = await session.scalar(select(func.count()).select_from(Job))
+            resumes = await session.scalar(
+                select(func.count()).select_from(Resume).where(Resume.user_id == uid)
+            )
+            jobs = await session.scalar(
+                select(func.count()).select_from(Job).where(Job.user_id == uid)
+            )
             improvements = await session.scalar(
-                select(func.count()).select_from(Improvement)
+                select(func.count()).select_from(Improvement).where(Improvement.user_id == uid)
             )
             master = await session.execute(
-                select(Resume.resume_id).where(Resume.is_master.is_(True)).limit(1)
+                select(Resume.resume_id)
+                .where(Resume.user_id == uid, Resume.is_master.is_(True))
+                .limit(1)
             )
             return {
                 "total_resumes": int(resumes or 0),
@@ -1295,6 +1418,54 @@ class Database:
                 "total_improvements": int(improvements or 0),
                 "has_master_resume": master.first() is not None,
             }
+
+    async def reset_user_data(self) -> None:
+        """Delete all document data belonging to the active user context.
+
+        Deletes rows from resumes, jobs, improvements, tailoring_previews, and applications.
+        Does not touch api_keys or the uploads folder.
+        """
+        uid = self._uid()
+        async with self._write_session() as session:
+            await session.execute(
+                delete(TailoringPreview).where(TailoringPreview.user_id == uid)
+            )
+            await session.execute(
+                delete(Application).where(Application.user_id == uid)
+            )
+            await session.execute(
+                delete(Improvement).where(Improvement.user_id == uid)
+            )
+            await session.execute(
+                delete(Job).where(Job.user_id == uid)
+            )
+            await session.execute(
+                delete(Resume).where(Resume.user_id == uid)
+            )
+            await session.commit()
+
+    async def assign_orphan_rows(self, user_id: str) -> dict[str, int]:
+        """Assign unowned (NULL user_id) rows across the 5 doc tables to user_id.
+
+        This maintenance method operates explicitly on user_id and is idempotent.
+        """
+        counts: dict[str, int] = {}
+        async with self._write_session() as session:
+            for model, name in (
+                (Resume, "resumes"),
+                (Job, "jobs"),
+                (Improvement, "improvements"),
+                (TailoringPreview, "tailoring_previews"),
+                (Application, "applications"),
+            ):
+                result = await session.execute(
+                    update(model)
+                    .where(model.user_id.is_(None))
+                    .values(user_id=user_id)
+                )
+                counts[name] = result.rowcount or 0
+            await session.commit()
+        return counts
 
     async def reset_database(self) -> None:
         """Reset by truncating user-document tables and clearing uploads.
@@ -1357,18 +1528,23 @@ class Database:
 
     async def create_user(
         self,
-        id: str,
-        email: str,
-        display_name: str,
+        id: str | None = None,
+        email: str = "",
+        display_name: str = "",
         password_hash: str | None = None,
         role: str = "user",
         is_active: bool = True,
         content_language: str = "id",
         daily_ai_limit: int | None = None,
+        *,
+        user_id: str | None = None,
     ) -> dict[str, Any]:
         """Create a new user record."""
+        actual_id = id or user_id
+        if not actual_id:
+            raise ValueError("id or user_id required")
         row = User(
-            id=id,
+            id=actual_id,
             email=email.strip().lower(),
             display_name=display_name.strip(),
             password_hash=password_hash,

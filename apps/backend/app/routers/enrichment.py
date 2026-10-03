@@ -8,7 +8,9 @@ import re
 from typing import Any
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
+
+from app.auth.deps import require_user
 
 from app.ai_limits import MAX_ITEM_WORKERS, PromptSizeError, require_source_size
 from app.ai_budget import (
@@ -46,7 +48,10 @@ from app.schemas.enrichment import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    route_class=AIOperationRoute, prefix="/enrichment", tags=["Enrichment"]
+    route_class=AIOperationRoute,
+    prefix="/enrichment",
+    tags=["Enrichment"],
+    dependencies=[Depends(require_user)],
 )
 
 

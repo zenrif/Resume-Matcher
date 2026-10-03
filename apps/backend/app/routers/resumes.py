@@ -11,9 +11,11 @@ from pathlib import Path
 from typing import Any, NoReturn
 from uuid import uuid4
 
-from fastapi import APIRouter, File, HTTPException, Query, Request, UploadFile
+from fastapi import APIRouter, Depends, File, HTTPException, Query, Request, UploadFile
 from fastapi.responses import Response
 from pydantic import ValidationError
+
+from app.auth.deps import require_user
 
 from app.ai_limits import MAX_JOB_CHARACTERS, PromptSizeError, require_source_size
 from app.ai_budget import (
@@ -754,7 +756,12 @@ async def _generate_auxiliary_messages(
     return cover_letter, outreach_message, title, interview_prep, warnings
 
 
-router = APIRouter(route_class=AIOperationRoute, prefix="/resumes", tags=["Resumes"])
+router = APIRouter(
+    route_class=AIOperationRoute,
+    prefix="/resumes",
+    tags=["Resumes"],
+    dependencies=[Depends(require_user)],
+)
 
 ALLOWED_TYPES = {
     "application/pdf",

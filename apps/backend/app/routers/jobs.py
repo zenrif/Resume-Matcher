@@ -2,12 +2,13 @@
 
 import logging
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth.deps import require_user
 from app.database import DatabaseBusyError, db
 from app.schemas import JobUploadRequest, JobUploadResponse
 
-router = APIRouter(prefix="/jobs", tags=["Jobs"])
+router = APIRouter(prefix="/jobs", tags=["Jobs"], dependencies=[Depends(require_user)])
 logger = logging.getLogger(__name__)
 
 

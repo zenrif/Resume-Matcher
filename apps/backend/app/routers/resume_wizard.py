@@ -5,8 +5,9 @@ import logging
 from typing import Any
 from uuid import uuid4
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, Depends, HTTPException
 
+from app.auth.deps import require_user
 from app.ai_budget import AIOperationDeadlineExceeded, AIOperationRoute
 from app.ai_limits import PromptSizeError
 from app.database import MasterResumeLimitError, db
@@ -28,7 +29,10 @@ from app.services.resume_wizard import (
 logger = logging.getLogger(__name__)
 
 router = APIRouter(
-    route_class=AIOperationRoute, prefix="/resume-wizard", tags=["Resume Wizard"]
+    route_class=AIOperationRoute,
+    prefix="/resume-wizard",
+    tags=["Resume Wizard"],
+    dependencies=[Depends(require_user)],
 )
 
 

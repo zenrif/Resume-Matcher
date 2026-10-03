@@ -4,8 +4,9 @@ import json
 import logging
 from pathlib import Path
 
-from fastapi import APIRouter, BackgroundTasks, HTTPException
+from fastapi import APIRouter, BackgroundTasks, HTTPException, Request
 
+from app.auth.deps import require_user
 from app.config import settings
 from app.llm import check_llm_health, LLMConfig, resolve_api_key
 from app.schemas import (
@@ -41,6 +42,7 @@ from app.config import (
     load_config_file,
     save_config_file,
 )
+from app.auth.context import current_content_language, current_user_id
 from app.config_cache import invalidate_config_cache
 from app.database import db
 
@@ -295,16 +297,27 @@ SUPPORTED_LANGUAGES = ["en", "es", "zh", "ja", "pt", "fr", "ko"]
 
 
 @router.get("/language", response_model=LanguageConfigResponse)
-async def get_language_config() -> LanguageConfigResponse:
+async def get_language_config(request: Request) -> LanguageConfigResponse:
     """Get current language configuration."""
+    try:
+        await require_user(request)
+    except Exception:
+        pass
     stored = _load_config()
 
     # Support legacy single 'language' field migration
     legacy_language = stored.get("language", "en")
+    content_language = stored.get("content_language", legacy_language)
+
+    user_id = current_user_id.get()
+    if user_id:
+        user = await db.get_user(user_id)
+        if user and user.get("content_language"):
+            content_language = user["content_language"]
 
     return LanguageConfigResponse(
         ui_language=stored.get("ui_language", legacy_language),
-        content_language=stored.get("content_language", legacy_language),
+        content_language=content_language,
         supported_languages=SUPPORTED_LANGUAGES,
     )
 
@@ -312,8 +325,13 @@ async def get_language_config() -> LanguageConfigResponse:
 @router.put("/language", response_model=LanguageConfigResponse)
 async def update_language_config(
     request: LanguageConfigRequest,
+    req: Request,
 ) -> LanguageConfigResponse:
     """Update language configuration."""
+    try:
+        await require_user(req)
+    except Exception:
+        pass
     stored = _load_config()
 
     # Validate and update UI language
@@ -325,6 +343,8 @@ async def update_language_config(
             )
         stored["ui_language"] = request.ui_language
 
+    user_id = current_user_id.get()
+
     # Validate and update content language
     if request.content_language is not None:
         if request.content_language not in SUPPORTED_LANGUAGES:
@@ -332,17 +352,26 @@ async def update_language_config(
                 status_code=400,
                 detail=f"Unsupported content language: {request.content_language}. Supported: {SUPPORTED_LANGUAGES}",
             )
-        stored["content_language"] = request.content_language
+        if user_id:
+            await db.update_user(user_id, content_language=request.content_language)
+            current_content_language.set(request.content_language)
+        else:
+            stored["content_language"] = request.content_language
 
     # Save config
     _save_config(stored)
 
     # Support legacy single 'language' field migration
     legacy_language = stored.get("language", "en")
+    content_language = stored.get("content_language", legacy_language)
+    if user_id:
+        user = await db.get_user(user_id)
+        if user and user.get("content_language"):
+            content_language = user["content_language"]
 
     return LanguageConfigResponse(
         ui_language=stored.get("ui_language", legacy_language),
-        content_language=stored.get("content_language", legacy_language),
+        content_language=content_language,
         supported_languages=SUPPORTED_LANGUAGES,
     )
 

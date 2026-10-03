@@ -37,7 +37,10 @@ def pytest_unconfigure(config: pytest.Config) -> None:
         os.environ.pop("DATA_DIR", None)
     else:
         os.environ["DATA_DIR"] = _ORIGINAL_DATA_DIR
-    _TEST_DATA_DIR_CONTEXT.cleanup()
+    try:
+        _TEST_DATA_DIR_CONTEXT.cleanup()
+    except Exception:
+        pass
 
 
 @pytest.fixture(scope="session")
@@ -106,7 +109,10 @@ async def isolated_backend_state(
     from app.database import Database
 
     test_data_dir = tmp_path / "data"
-    test_db = Database(db_path=test_data_dir / "resume_matcher.db")
+    test_db = Database(
+        db_path=test_data_dir / "resume_matcher.db",
+        fallback_user_id="test-user",
+    )
 
     monkeypatch.setattr(config_module.settings, "data_dir", test_data_dir)
     # Preserve compatibility with code/tests that still monkeypatch the legacy
@@ -118,7 +124,7 @@ async def isolated_backend_state(
     # alias already loaded during collection; modules imported later receive
     # app.database.db, which is already the isolated instance.
     for module_name, module in tuple(sys.modules.items()):
-        if not module_name.startswith("app.") or module is None:
+        if module is None or not (module_name.startswith("app.") or module_name.startswith("tests.")):
             continue
         if isinstance(getattr(module, "db", None), Database):
             monkeypatch.setattr(module, "db", test_db)
@@ -131,6 +137,44 @@ async def isolated_backend_state(
         invalidate_config_cache()
         crypto.reset_cache()
         await test_db.close()
+
+
+@pytest.fixture(autouse=True)
+async def authenticated_user(request: pytest.FixtureRequest) -> AsyncIterator[None]:
+    """Provide an authenticated user dependency override for all tests unless marked no_auth."""
+    if "no_auth" in request.keywords:
+        yield
+        return
+
+    from app.main import app
+    from app.auth.deps import get_current_user
+    from app.auth.context import current_content_language, current_user_id
+
+    user_data = {
+        "id": "test-user",
+        "email": "test@example.com",
+        "display_name": "Test User",
+        "role": "admin",
+        "is_active": True,
+        "content_language": "en",
+        "daily_ai_limit": None,
+    }
+
+    token = current_user_id.set("test-user")
+    lang_token = current_content_language.set("en")
+
+    async def override_user():
+        current_user_id.set("test-user")
+        current_content_language.set("en")
+        return dict(user_data)
+
+    app.dependency_overrides[get_current_user] = override_user
+    try:
+        yield
+    finally:
+        app.dependency_overrides.pop(get_current_user, None)
+        current_user_id.reset(token)
+        current_content_language.reset(lang_token)
 
 
 # ---------------------------------------------------------------------------

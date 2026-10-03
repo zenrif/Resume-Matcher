@@ -7,10 +7,9 @@ from typing import Any
 
 from fastapi import Depends, HTTPException, Request, status
 
-from app.auth.context import current_user_id
+from app.auth.context import current_content_language, current_user_id
 from app.auth.sessions import COOKIE_NAME, hash_token
 from app.config import settings
-from app.database import db
 
 
 def get_client_ip(request: Request) -> str:
@@ -34,6 +33,8 @@ async def get_current_user(request: Request) -> dict[str, Any]:
     MUST be an async def dependency to run directly on the event loop, ensuring
     ``current_user_id.set()`` modifies the active request context.
     """
+    from app.database import db
+
     token = request.cookies.get(COOKIE_NAME)
     if not token or not token.strip():
         raise HTTPException(
@@ -81,17 +82,54 @@ async def get_current_user(request: Request) -> dict[str, Any]:
 
     # Carry user scope in the ContextVar for the current request
     current_user_id.set(user["id"])
+    if user.get("content_language"):
+        current_content_language.set(user["content_language"])
     return user
 
 
-async def require_user(user: dict[str, Any] = Depends(get_current_user)) -> dict[str, Any]:
-    """Require an authenticated and active user."""
-    return user
+AUTH_EXEMPT_PATH_PREFIXES: tuple[str, ...] = (
+    "/api/v1/resumes/render-drafts/",
+)
 
 
-async def require_admin(user: dict[str, Any] = Depends(require_user)) -> dict[str, Any]:
+async def require_user(request: Request) -> dict[str, Any] | None:
+    """Require an authenticated and active user, except for exempt routes."""
+    path = request.url.path
+    for prefix in AUTH_EXEMPT_PATH_PREFIXES:
+        if path.startswith(prefix) or path.startswith(prefix.removeprefix("/api/v1")):
+            return None
+
+    override = request.app.dependency_overrides.get(get_current_user)
+    if override:
+        import inspect
+        res = override(request) if len(inspect.signature(override).parameters) > 0 else override()
+        user = await res if inspect.isawaitable(res) else res
+        if isinstance(user, dict):
+            if "id" in user:
+                current_user_id.set(user["id"])
+            if user.get("content_language"):
+                current_content_language.set(user["content_language"])
+        return user
+
+    return await get_current_user(request)
+
+
+async def require_admin(request: Request) -> dict[str, Any]:
     """Require an authenticated user with admin role."""
-    if user.get("role") != "admin":
+    override = request.app.dependency_overrides.get(get_current_user)
+    if override:
+        import inspect
+        res = override(request) if len(inspect.signature(override).parameters) > 0 else override()
+        user = await res if inspect.isawaitable(res) else res
+        if isinstance(user, dict):
+            if "id" in user:
+                current_user_id.set(user["id"])
+            if user.get("content_language"):
+                current_content_language.set(user["content_language"])
+    else:
+        user = await get_current_user(request)
+
+    if not isinstance(user, dict) or user.get("role") != "admin":
         raise HTTPException(
             status_code=status.HTTP_403_FORBIDDEN,
             detail="Admin privileges required.",

@@ -79,18 +79,46 @@ def init_models_sync(engine: Engine) -> None:
                     "ALTER TABLE resumes ADD COLUMN is_default_master BOOLEAN NOT NULL DEFAULT 0"
                 )
             # Multi-track masters: the single-master slot is replaced by a
-            # single-default slot. create_all never drops indexes on existing tables.
+            # per-user default slot. create_all never drops indexes on existing tables.
             conn.exec_driver_sql("DROP INDEX IF EXISTS ux_resumes_single_master")
+            conn.exec_driver_sql("DROP INDEX IF EXISTS ux_resumes_single_default_master")
+
+        # Migrate user_id on document tables (T2.2)
+        doc_tables = ("resumes", "jobs", "improvements", "tailoring_previews", "applications")
+        for table in doc_tables:
+            t_cols = conn.exec_driver_sql(f"PRAGMA table_info({table})").mappings().all()
+            if t_cols:
+                t_col_names = {c["name"] for c in t_cols}
+                if "user_id" not in t_col_names:
+                    conn.exec_driver_sql(f"ALTER TABLE {table} ADD COLUMN user_id TEXT")
+                conn.exec_driver_sql(f"CREATE INDEX IF NOT EXISTS ix_{table}_user_id ON {table} (user_id)")
+
+        # Per-user default master index and promotion (T2.2)
+        if columns and "is_master" in existing_columns:
             if "created_at" in existing_columns:
                 conn.exec_driver_sql(
-                    "UPDATE resumes SET is_default_master = 1 WHERE resume_id = ("
-                    "SELECT resume_id FROM resumes WHERE is_master = 1 "
-                    "ORDER BY created_at, resume_id LIMIT 1) "
-                    "AND NOT EXISTS (SELECT 1 FROM resumes WHERE is_default_master = 1)"
+                    "UPDATE resumes "
+                    "SET is_default_master = 1 "
+                    "WHERE resume_id IN ("
+                    "  SELECT r1.resume_id FROM resumes r1 "
+                    "  WHERE r1.is_master = 1 "
+                    "    AND NOT EXISTS ("
+                    "      SELECT 1 FROM resumes r2 "
+                    "      WHERE r2.is_default_master = 1 "
+                    "        AND (r2.user_id = r1.user_id OR (r2.user_id IS NULL AND r1.user_id IS NULL))"
+                    "    ) "
+                    "    AND r1.resume_id = ("
+                    "      SELECT r3.resume_id FROM resumes r3 "
+                    "      WHERE r3.is_master = 1 "
+                    "        AND (r3.user_id = r1.user_id OR (r3.user_id IS NULL AND r1.user_id IS NULL)) "
+                    "      ORDER BY r3.created_at, r3.resume_id "
+                    "      LIMIT 1"
+                    "    )"
+                    ")"
                 )
             conn.exec_driver_sql(
-                "CREATE UNIQUE INDEX IF NOT EXISTS ux_resumes_single_default_master "
-                "ON resumes (is_default_master) WHERE is_default_master = 1"
+                "CREATE UNIQUE INDEX IF NOT EXISTS ux_resumes_default_master_per_user "
+                "ON resumes (user_id, is_default_master) WHERE is_default_master = 1"
             )
 
         preview_columns = conn.exec_driver_sql("PRAGMA table_info(tailoring_previews)").mappings().all()

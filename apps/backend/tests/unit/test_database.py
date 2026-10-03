@@ -380,7 +380,8 @@ class TestDefaultMasterMigration:
                 preview_cols = [c["name"] for c in conn.exec_driver_sql("PRAGMA table_info(tailoring_previews)").mappings()]
             assert names.count("is_default_master") == 1
             assert "ux_resumes_single_master" not in indexes
-            assert "ux_resumes_single_default_master" in indexes
+            assert "ux_resumes_single_default_master" not in indexes
+            assert "ux_resumes_default_master_per_user" in indexes
             assert rows == {"old-master": 1, "child": 0}
             assert preview_cols.count("source_data") == 1
         finally:
@@ -393,9 +394,10 @@ class TestDefaultMasterMigration:
         try:
             init_models_sync(engine)
             with engine.begin() as conn:
+                conn.exec_driver_sql("UPDATE resumes SET user_id = 'u1'")
                 conn.exec_driver_sql(
-                    "INSERT INTO resumes (resume_id, content, is_master, is_default_master, created_at) "
-                    "VALUES ('track-2', 't', 1, 0, '2026-01-03T00:00:00')"
+                    "INSERT INTO resumes (resume_id, user_id, content, is_master, is_default_master, created_at) "
+                    "VALUES ('track-2', 'u1', 't', 1, 0, '2026-01-03T00:00:00')"
                 )
             with pytest.raises(sqlalchemy.exc.IntegrityError):
                 with engine.begin() as conn:
