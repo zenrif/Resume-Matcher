@@ -4,14 +4,24 @@ services:
     build: .
     container_name: resume-matcher
     ports:
-      - "${PORT:-3000}:3000"
+      - "127.0.0.1:${PORT:-3000}:3000"
     volumes:
       - resume-data:/app/backend/data
     #secrets:
     #  - llm_api_key
     environment:
-      # domain in reverse proxy
+      # FRONTEND_BASE_URL stays http://localhost:3000 so Chromium inside the container
+      # calls Next locally (Option A)
       - FRONTEND_BASE_URL=${FRONTEND_BASE_URL:-http://localhost:3000}
+      # Public Base URL (used for bootstrap invite link generation)
+      - PUBLIC_BASE_URL=${PUBLIC_BASE_URL:-}
+      # Auth & Security settings
+      - AUTH_COOKIE_SECURE=${AUTH_COOKIE_SECURE:-true}
+      - AUTH_SESSION_DAYS=${AUTH_SESSION_DAYS:-30}
+      - ADMIN_EMAIL=${ADMIN_EMAIL:-}
+      - DEFAULT_DAILY_AI_LIMIT=${DEFAULT_DAILY_AI_LIMIT:-30}
+      - TRUST_PROXY=${TRUST_PROXY:-true}
+      - DOCS_ENABLED=${DOCS_ENABLED:-false}
       # Logging configuration: DEBUG, INFO, WARNING, ERROR
       - LOG_LEVEL=${LOG_LEVEL:-INFO}
       #- LOG_LEVEL_FILE=${LOG_LEVEL_FILE:-}
@@ -29,8 +39,8 @@ services:
       # For Ollama running on host machine, use host.docker.internal:
       # - LLM_API_BASE=http://host.docker.internal:11434
       - LLM_API_BASE=${LLM_API_BASE:-}
-      # CORS origins (JSON array format). FRONTEND_BASE_URL is auto-included.
-      #- CORS_ORIGINS=["http://localhost:3000","http://127.0.0.1:3000"]
+      # CORS origins (JSON array format). Set to your public domain, e.g. ["https://cv.example.com"]
+      - CORS_ORIGINS=${CORS_ORIGINS:-["http://localhost:3000"]}
     restart: unless-stopped
 
 #secrets:
