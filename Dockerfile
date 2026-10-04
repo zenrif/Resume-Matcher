@@ -15,10 +15,10 @@ ENV NEXT_TELEMETRY_DISABLED=1 \
 WORKDIR /app/frontend
 
 # Copy package files first for better caching
-COPY apps/frontend/package*.json ./
+COPY apps/frontend/package*.json apps/frontend/.npmrc* ./
 
-# Install dependencies
-RUN npm ci
+# Install dependencies with network retry resilience
+RUN npm ci --fetch-retries=5 --fetch-retry-mintimeout=20000 --fetch-retry-maxtimeout=120000
 
 # Copy frontend source
 COPY apps/frontend/ ./
