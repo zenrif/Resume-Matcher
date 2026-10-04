@@ -120,6 +120,23 @@ _COPY: dict[str, dict[str, str]] = {
         "warning_education": "학력이 비어 있습니다. 의도한 경우에만 건너뛰세요.",
         "warning_skills": "기술이 비어 있습니다. 사용해 본 도구나 기술을 추가해 주세요.",
     },
+    "id": {
+        "intro": "Halo — saya akan membantu Anda membuat master resume. Siapa nama Anda, dan posisi apa yang Anda tuju?",
+        "contact": "Apa email, nomor telepon, atau tautan (LinkedIn / GitHub / situs web) terbaik yang ingin Anda cantumkan?",
+        "summary": "Dalam satu atau dua kalimat, bagaimana Anda mendeskripsikan diri Anda secara profesional?",
+        "workExperience": "Ceritakan tentang satu pengalaman kerja: posisi, perusahaan, tanggal, tanggung jawab, dan dampak terukur yang dihasilkan.",
+        "internships": "Ceritakan tentang satu pengalaman magang: posisi, perusahaan, tanggal, apa yang Anda kerjakan, dan hasil atau perubahannya.",
+        "education": "Ceritakan tentang pendidikan Anda: universitas/sekolah, gelar, tanggal, serta prestasi atau mata kuliah unggulan.",
+        "personalProjects": "Ceritakan tentang satu proyek: apa yang Anda buat, mengapa penting, teknologi yang digunakan, dan hasilnya.",
+        "skills": "Alat (tools), teknologi, atau keahlian apa yang ingin Anda cantumkan di resume?",
+        "review": "Mari kita tinjau apa yang sudah diisi sebelum membuat master resume Anda.",
+        "next": "Apa yang ingin Anda tambahkan selanjutnya?",
+        "warning_name": "Tambahkan nama Anda — wajib diisi untuk membuat resume.",
+        "warning_contact": "Tambahkan setidaknya satu metode kontak (email, telepon, atau tautan).",
+        "warning_experience": "Tambahkan setidaknya satu pengalaman kerja, magang, atau proyek.",
+        "warning_education": "Pendidikan masih kosong — lewati hanya jika memang disengaja.",
+        "warning_skills": "Keahlian masih kosong — tambahkan alat atau teknologi yang pernah Anda gunakan.",
+    },
 }
 
 

@@ -133,6 +133,67 @@ AI_PHRASE_REPLACEMENTS: dict[str, str] = {
     "--": ", ",
 }
 
+# Indonesian AI Phrase Blacklist (Phase 6c)
+# Konservatif: frasa klise / buzzwords yang sering dihasilkan model LLM pada resume Indonesia
+AI_PHRASE_BLACKLIST_ID: set[str] = {
+    # Kata kerja tindakan berlebihan / klise AI
+    "memelopori",
+    "merevolusi",
+    "mengorkestrasi",
+    "mendayagunakan",
+    # Klise korporat dan resume
+    "sinergi",
+    "berdedikasi tinggi",
+    "pekerja keras",
+    "mampu bekerja di bawah tekanan",
+    "berpikir out of the box",
+    "terbaik di kelasnya",
+    "kelas dunia",
+    # Frasa pengisi (filler phrases)
+    "dalam rangka untuk",
+    "dengan tujuan untuk",
+    "pada dasarnya",
+    # Pola tanda baca
+    "\u2014",  # Em-dash
+    "---",
+    "--",
+}
+
+AI_PHRASE_REPLACEMENTS_ID: dict[str, str] = {
+    "memelopori": "memimpin",
+    "merevolusi": "mengubah",
+    "mengorkestrasi": "mengkoordinasikan",
+    "mendayagunakan": "menggunakan",
+    "sinergi": "kolaborasi",
+    "berdedikasi tinggi": "",
+    "pekerja keras": "",
+    "mampu bekerja di bawah tekanan": "",
+    "berpikir out of the box": "inovatif",
+    "terbaik di kelasnya": "unggul",
+    "kelas dunia": "berkualitas tinggi",
+    "dalam rangka untuk": "untuk",
+    "dengan tujuan untuk": "untuk",
+    "pada dasarnya": "",
+    "\u2014": ", ",
+    "---": ", ",
+    "--": ", ",
+}
+
+
+def get_ai_phrase_blacklist(language: str = "en") -> set[str]:
+    """Return the phrase blacklist for the specified content language."""
+    if language == "id":
+        return AI_PHRASE_BLACKLIST_ID
+    return AI_PHRASE_BLACKLIST
+
+
+def get_ai_phrase_replacements(language: str = "en") -> dict[str, str]:
+    """Return the phrase replacement mapping for the specified content language."""
+    if language == "id":
+        return AI_PHRASE_REPLACEMENTS_ID
+    return AI_PHRASE_REPLACEMENTS
+
+
 
 # Prompt for injecting missing keywords into a resume
 KEYWORD_INJECTION_PROMPT = """Inject the following keywords into this resume by reframing the candidate's existing experience in the job description's language. Target EVERY section (summary, work experience, projects, technical skills) by default.

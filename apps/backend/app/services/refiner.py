@@ -21,6 +21,8 @@ from app.prompts.refinement import (
     AI_PHRASE_BLACKLIST,
     AI_PHRASE_REPLACEMENTS,
     KEYWORD_INJECTION_PROMPT,
+    get_ai_phrase_blacklist,
+    get_ai_phrase_replacements,
 )
 from app.schemas.refinement import (
     AlignmentReport,
@@ -107,6 +109,7 @@ async def refine_resume(
     config: RefinementConfig | None = None,
     *,
     fixed_row_sections: tuple[str, ...] = (),
+    language: str = "en",
 ) -> RefinementResult:
     """Multi-pass refinement of an initially tailored resume.
 
@@ -118,6 +121,7 @@ async def refine_resume(
         config: Refinement configuration
         fixed_row_sections: Sections whose bullet set the harness already chose;
             the refiner's preservation keeps one row per chosen bullet there
+        language: Content language code (e.g. 'en', 'id')
 
     Returns:
         RefinementResult with refined data and analysis
@@ -175,7 +179,7 @@ async def refine_resume(
     if config.enable_ai_phrase_removal:
         attempts += 1
         before = _deep_copy(current)
-        current, removed = remove_ai_phrases(current, job_description)
+        current, removed = remove_ai_phrases(current, job_description, language=language)
         ai_phrases_found.extend(removed)
         if current != before:
             logger.info("Removed %d AI phrases: %s", len(removed), removed)
@@ -302,6 +306,7 @@ def analyze_keyword_gaps(
 def remove_ai_phrases(
     data: dict[str, Any],
     job_description: str = "",
+    language: str = "en",
 ) -> tuple[dict[str, Any], list[str]]:
     """Remove AI-generated phrases from resume content.
 
@@ -312,14 +317,18 @@ def remove_ai_phrases(
     Args:
         data: Resume data dictionary
         job_description: Job description text; phrases found here are skipped
+        language: Content language code (e.g. 'en', 'id')
 
     Returns:
         Tuple of (cleaned data, list of removed phrases)
     """
+    phrase_blacklist = get_ai_phrase_blacklist(language)
+    phrase_replacements = get_ai_phrase_replacements(language)
+
     # Build set of JD-protected phrases
     jd_lower = job_description.lower()
     jd_protected: set[str] = set()
-    for phrase in AI_PHRASE_BLACKLIST:
+    for phrase in phrase_blacklist:
         if phrase.lower() in jd_lower:
             jd_protected.add(phrase.lower())
 
@@ -331,13 +340,13 @@ def remove_ai_phrases(
 
     def clean_text(text: str) -> str:
         cleaned = text
-        for phrase in AI_PHRASE_BLACKLIST:
+        for phrase in phrase_blacklist:
             # Skip phrases that appear in the job description
             if phrase.lower() in jd_protected:
                 continue
             if phrase.lower() in cleaned.lower():
                 removed.add(phrase)
-                replacement = AI_PHRASE_REPLACEMENTS.get(phrase.lower(), "")
+                replacement = phrase_replacements.get(phrase.lower(), "")
                 # Case-insensitive replacement
                 pattern = re.compile(re.escape(phrase), re.IGNORECASE)
                 cleaned = pattern.sub(replacement, cleaned)

@@ -93,7 +93,7 @@ Two distinct settings, configured independently in Settings:
 - **UI language** — interface text, client-only (`uiLanguage`, localStorage).
 - **Content language** — language the LLM writes resumes/cover letters in (`contentLanguage`, persisted to backend).
 
-**Supported locales (source of truth = `i18n/config.ts`):** `en`, `es`, `zh`, `ja`, `pt` (the file is `messages/pt-BR.json`, imported as `pt`). The `docs/agent/features/i18n.md` table is stale — it omits `pt`; trust the code.
+**Supported locales (source of truth = `i18n/config.ts`):** `en`, `es`, `zh`, `ja`, `pt` (the file is `messages/pt-BR.json`, imported as `pt`), `fr`, `ko`, `id`. Parity across all locale files is strictly enforced.
 
 Engine (no external i18n lib, plain JSON):
 - `i18n/config.ts` — `locales`, `defaultLocale='en'`, `localeNames`, `localeFlags`.

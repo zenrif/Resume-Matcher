@@ -1459,6 +1459,7 @@ async def _improve_preview_flow(
                 job_keywords=job_keywords,
                 config=RefinementConfig(),
                 fixed_row_sections=fixed_row_sections,
+                language=language,
             )
             improved_data = refinement_result.refined_data
             refinement_stats = refinement_result.to_stats(initial_match)
@@ -1856,6 +1857,7 @@ async def improve_resume_endpoint(
                     job_description=job["content"],
                     job_keywords=job_keywords,
                     config=RefinementConfig(),
+                    language=language,
                 )
                 improved_data = refinement_result.refined_data
                 refinement_stats = refinement_result.to_stats(initial_match)

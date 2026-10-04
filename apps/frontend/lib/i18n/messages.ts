@@ -7,6 +7,7 @@ import ja from '@/messages/ja.json';
 import pt from '@/messages/pt-BR.json';
 import fr from '@/messages/fr.json';
 import ko from '@/messages/ko.json';
+import id from '@/messages/id.json';
 
 export type Messages = typeof en;
 
@@ -18,6 +19,7 @@ const allMessages: Record<Locale, Messages> = {
   pt,
   fr,
   ko,
+  id,
 };
 
 export function getMessages(locale: Locale): Messages {

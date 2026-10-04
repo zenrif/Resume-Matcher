@@ -810,7 +810,8 @@ class LanguageConfigResponse(BaseModel):
 
     ui_language: str = "en"  # Interface language
     content_language: str = "en"  # Generated content language
-    supported_languages: list[str] = ["en", "es", "zh", "ja", "pt", "fr", "ko"]
+    supported_languages: list[str] = ["en", "es", "zh", "ja", "pt", "fr", "ko", "id"]
+
 
 
 class PromptOption(BaseModel):
