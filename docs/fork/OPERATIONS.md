@@ -14,7 +14,7 @@
                    ▼
        ┌────────────────────────┐
        │   Traefik (Dokploy)    │  Port 80/443 (Otomatis SSL Let's Encrypt)
-       │   e.g. cv.domain.com   │  Menangani terminasi TLS & header X-Forwarded-*
+       │ e.g. cv.zen-ai.my.id   │  Menangani terminasi TLS & header X-Forwarded-*
        └───────────┬────────────┘
                    │
                    │ Jaringan Docker Internal (dokploy-network)
@@ -60,7 +60,7 @@ Anda dapat mendeploy Resume Matcher di Dokploy melalui salah satu dari dua metod
 3. **Konfigurasi Domain & SSL:**
    - Buka tab **Domains** pada aplikasi `resume-matcher`.
    - Klik **Add Domain**:
-     - **Host:** Domain/subdomain Anda (contoh: `cv.domainanda.com`).
+     - **Host:** `cv.zen-ai.my.id`
      - **Path:** `/`.
      - **Container Port:** `3000`.
      - **HTTPS:** Centang/aktifkan tombol **Certificate / SSL (Let's Encrypt)**.
@@ -80,14 +80,14 @@ Anda dapat mendeploy Resume Matcher di Dokploy melalui salah satu dari dua metod
    ```env
    # --- Domain & Jaringan ---
    FRONTEND_BASE_URL=http://localhost:3000
-   PUBLIC_BASE_URL=https://cv.domainanda.com
-   CORS_ORIGINS=["https://cv.domainanda.com"]
+   PUBLIC_BASE_URL=https://cv.zen-ai.my.id
+   CORS_ORIGINS=["https://cv.zen-ai.my.id"]
    TRUST_PROXY=true
 
    # --- Autentikasi & Keamanan ---
    AUTH_COOKIE_SECURE=true
    AUTH_SESSION_DAYS=30
-   ADMIN_EMAIL=pemilik@domainanda.com
+   ADMIN_EMAIL=zaenalarifmagang@gmail.com
    DEFAULT_DAILY_AI_LIMIT=30
    DOCS_ENABLED=false
    MIN_PASSWORD_LENGTH=10
@@ -122,14 +122,14 @@ Jika Anda lebih menyukai mode Compose di Dokploy:
          - resume-matcher-data:/app/backend/data
        environment:
          - FRONTEND_BASE_URL=http://localhost:3000
-         - PUBLIC_BASE_URL=https://cv.domainanda.com
+         - PUBLIC_BASE_URL=https://cv.zen-ai.my.id
          - AUTH_COOKIE_SECURE=true
          - AUTH_SESSION_DAYS=30
-         - ADMIN_EMAIL=pemilik@domainanda.com
+         - ADMIN_EMAIL=zaenalarifmagang@gmail.com
          - DEFAULT_DAILY_AI_LIMIT=30
          - TRUST_PROXY=true
          - DOCS_ENABLED=false
-         - CORS_ORIGINS=["https://cv.domainanda.com"]
+         - CORS_ORIGINS=["https://cv.zen-ai.my.id"]
          - LOG_LEVEL=INFO
          - LOG_LLM=WARNING
          - LLM_PROVIDER=openai
@@ -150,7 +150,7 @@ Setelah proses deploy pertama selesai dan container berjalan:
    - Di dashboard aplikasi Dokploy, buka tab **Logs** / **Deployments**.
    - Cari baris yang diawali dengan:
      ```text
-     Admin invite link: https://cv.domainanda.com/invite/<token_rahasia>
+     Admin invite link: https://cv.zen-ai.my.id/invite/<token_rahasia>
      ```
 2. **Aktivasi Akun:**
    - Buka tautan tersebut di peramban Anda.
@@ -166,18 +166,18 @@ Jika Anda lupa kata sandi admin atau log sudah terhapus:
 1. Buka dashboard Dokploy -> pilih aplikasi `resume-matcher` -> buka tab **Terminal** / **Console**.
 2. Jalankan perintah berikut di terminal container:
    ```bash
-   python -m app.scripts.create_admin --email pemilik@domainanda.com
+   python -m app.scripts.create_admin --email zaenalarifmagang@gmail.com
    ```
 3. Script akan mencetak tautan reset baru:
    ```text
-   Admin invite link: https://cv.domainanda.com/invite/<token_baru>
+   Admin invite link: https://cv.zen-ai.my.id/invite/<token_baru>
    ```
 4. Buka tautan tersebut di peramban untuk mengatur ulang kata sandi admin Anda.
 
 > [!TIP]
 > Anda juga dapat menjalankan perintah ini dari SSH VPS langsung:
 > ```bash
-> docker exec -it $(docker ps -qf "name=resume-matcher") python -m app.scripts.create_admin --email pemilik@domainanda.com
+> docker exec -it $(docker ps -qf "name=resume-matcher") python -m app.scripts.create_admin --email zaenalarifmagang@gmail.com
 > ```
 
 ---
