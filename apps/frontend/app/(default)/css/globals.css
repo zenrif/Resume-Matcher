@@ -62,9 +62,10 @@
   --shadow-sw-lg: 8px 8px 0px 0px #000000;
   --shadow-sw-xl: 12px 12px 0px 0px #000000;
 
-  /* Fonts */
+  /* Fonts: 100% Plus Jakarta Sans across the entire web application UI */
   --font-sans: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
-  --font-mono: var(--font-space-grotesk), 'Space Grotesk', monospace;
+  --font-serif: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
+  --font-mono: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
 
   /* Animations */
   --animate-gradient: gradient 8s linear infinite;
@@ -77,8 +78,9 @@
 }
 
 :root {
-  --font-mono: var(--font-space-grotesk), 'Space Grotesk', monospace;
   --font-sans: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
+  --font-serif: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
+  --font-mono: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
 
   /* Swiss International Style Palette */
   --background: #f0f0e8; /* Canvas */
@@ -135,6 +137,13 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-family: var(--font-sans);
+  }
+  input,
+  button,
+  textarea,
+  select {
+    font-family: inherit;
   }
   /* The global `button { font-family: var(--font-mono) }` rule was removed.
      The Button component applies font-mono via its Tailwind classes, and the

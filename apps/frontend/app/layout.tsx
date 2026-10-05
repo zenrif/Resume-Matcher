@@ -1,12 +1,6 @@
 import type { Metadata } from 'next';
-import { Noto_Sans_JP, Noto_Sans_KR, Noto_Sans_SC, Plus_Jakarta_Sans, Space_Grotesk } from 'next/font/google';
+import { Noto_Sans_JP, Noto_Sans_KR, Noto_Sans_SC, Plus_Jakarta_Sans } from 'next/font/google';
 import './(default)/css/globals.css';
-
-const spaceGrotesk = Space_Grotesk({
-  variable: '--font-space-grotesk',
-  subsets: ['latin'],
-  display: 'swap',
-});
 
 const plusJakartaSans = Plus_Jakarta_Sans({
   variable: '--font-plus-jakarta-sans',
@@ -59,7 +53,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en-US" className="h-full" suppressHydrationWarning>
       <body
-        className={`${plusJakartaSans.variable} ${spaceGrotesk.variable} ${notoSansSC.variable} ${notoSansKR.variable} ${notoSansJP.variable} font-sans antialiased bg-background text-ink-soft min-h-full`}
+        className={`${plusJakartaSans.variable} ${notoSansSC.variable} ${notoSansKR.variable} ${notoSansJP.variable} font-sans antialiased bg-background text-ink-soft min-h-full`}
       >
         {children}
       </body>
