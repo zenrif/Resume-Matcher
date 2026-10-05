@@ -1,6 +1,6 @@
 services:
   resume-matcher:
-    image: ghcr.io/srbhr/resume-matcher
+    image: ghcr.io/zenrif/resume-matcher:latest
     build: .
     container_name: resume-matcher
     ports:

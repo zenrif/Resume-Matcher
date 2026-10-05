@@ -43,19 +43,21 @@
 
 Anda dapat mendeploy Resume Matcher di Dokploy melalui salah satu dari dua metode di bawah ini:
 
-### Metode A: Sebagai "Application" (Direkomendasikan via Git)
+### Metode A: Sebagai "Application" (Docker Image via GHCR — Sangat Direkomendasikan)
+
+> [!TIP]
+> Menggunakan pre-built image dari GitHub Container Registry (GHCR) mencegah VPS mengalami kehabisan memori (*Out Of Memory / OOM*) karena proses kompilasi Next.js dan instalasi Playwright/Chromium dijalankan sepenuhnya di GitHub Actions runner (7 GB RAM).
 
 1. **Buat Aplikasi Baru:**
    - Masuk ke dashboard Dokploy Anda.
    - Pilih Project / Environment Anda, lalu klik **Create Application**.
    - Beri nama, misalnya `resume-matcher`.
 
-2. **Hubungkan Sumber Kode (Git):**
-   - **Provider:** GitHub / Git.
-   - **Repository:** Repository fork Anda (misal `zenrif/Resume-Matcher`).
-   - **Branch:** Branch rilis Anda (misal `main` atau `fork/phase-7-deployment`).
-   - **Build Type:** Pilih **Dockerfile**.
-   - **Dockerfile Path:** `./Dockerfile`.
+2. **Konfigurasi Sumber Aplikasi (Docker Image):**
+   - Di tab pengaturan aplikasi Dokploy (**General / Settings**):
+   - **Build Type:** Pilih **Docker Image** (bukan Dockerfile).
+   - **Docker Image:** Masukkan `ghcr.io/zenrif/resume-matcher:latest`.
+   - *(Pastikan package di GitHub `github.com/users/zenrif/packages/container/resume-matcher/settings` sudah diatur visibilitasnya ke **Public** agar Dokploy dapat melakukan pull secara anonim tanpa kredensial).*
 
 3. **Konfigurasi Domain & SSL:**
    - Buka tab **Domains** pada aplikasi `resume-matcher`.
@@ -102,7 +104,7 @@ Anda dapat mendeploy Resume Matcher di Dokploy melalui salah satu dari dua metod
 
 6. **Deploy:**
    - Klik tombol **Deploy** di Dokploy.
-   - Dokploy akan mengunduh repository, membangun image Docker sesuai `Dockerfile`, mengonfigurasi Traefik, dan menjalankan container.
+   - Dokploy akan langsung menarik (*pull*) image pre-built `ghcr.io/zenrif/resume-matcher:latest`, mengonfigurasi Traefik, dan menjalankan container secara instan tanpa membebani RAM VPS untuk proses build.
 
 ---
 
