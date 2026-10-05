@@ -92,6 +92,38 @@ describe('AuthProvider & AuthGate', () => {
     }
   });
 
+  it('redirects root / to /login?next=%2Fdashboard when unauthenticated', async () => {
+    vi.spyOn(authApi, 'me').mockResolvedValueOnce(null);
+
+    const originalLocation = window.location;
+    delete (window as unknown as { location?: unknown }).location;
+    (
+      window as unknown as { location: { href: string; pathname: string; search: string } }
+    ).location = {
+      href: 'http://localhost:3000/',
+      pathname: '/',
+      search: '',
+    };
+
+    try {
+      render(
+        <AuthProvider>
+          <AuthGate>
+            <div data-testid="protected-content">SECRET</div>
+          </AuthGate>
+        </AuthProvider>
+      );
+
+      await waitFor(() => {
+        expect(window.location.href).toBe('/login?next=%2Fdashboard');
+      });
+
+      expect(screen.queryByTestId('protected-content')).toBeNull();
+    } finally {
+      (window as unknown as { location: unknown }).location = originalLocation;
+    }
+  });
+
   it('recognizes regular user role and sets isAdmin to false', async () => {
     vi.spyOn(authApi, 'me').mockResolvedValueOnce({
       id: 'u-2',

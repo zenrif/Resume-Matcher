@@ -31,7 +31,7 @@ function LoginForm() {
       await login({ email, password });
       const nextParam = searchParams.get('next');
       const target = sanitizeNextUrl(nextParam);
-      window.location.href = target;
+      window.location.href = target === '/' ? '/dashboard' : target;
     } catch (err: unknown) {
       setLoading(false);
       if (err instanceof Error) {

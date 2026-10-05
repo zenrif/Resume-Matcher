@@ -233,10 +233,19 @@ export function parseErrorDetail(body: string): string | null {
 /**
  * Sanitizes the `next` redirect path to protect against open redirects.
  * Only accepts paths starting with a single '/' (rejects '//', '/\', and absolute URLs).
+ * Root path ('/'), login paths ('/login...'), and empty/null values default to '/dashboard'.
  */
 export function sanitizeNextUrl(next: string | null | undefined): string {
   if (!next || typeof next !== 'string') return '/dashboard';
   const trimmed = next.trim();
+  if (
+    trimmed === '/' ||
+    trimmed === '/login' ||
+    trimmed.startsWith('/login?') ||
+    trimmed.startsWith('/login/')
+  ) {
+    return '/dashboard';
+  }
   if (trimmed.startsWith('/') && !trimmed.startsWith('//') && !trimmed.startsWith('/\\')) {
     return trimmed;
   }

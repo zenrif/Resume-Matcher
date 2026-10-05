@@ -221,6 +221,13 @@ describe('api client', () => {
       expect(sanitizeNextUrl(null)).toBe('/dashboard');
       expect(sanitizeNextUrl(undefined)).toBe('/dashboard');
     });
+
+    it('redirects root and login paths to /dashboard', () => {
+      expect(sanitizeNextUrl('/')).toBe('/dashboard');
+      expect(sanitizeNextUrl('/login')).toBe('/dashboard');
+      expect(sanitizeNextUrl('/login?next=/tracker')).toBe('/dashboard');
+      expect(sanitizeNextUrl('/login/reset')).toBe('/dashboard');
+    });
   });
 
   describe('apiFetch 401 redirect', () => {
