@@ -1208,6 +1208,8 @@
     "settingPassword": "Setting Password...",
     "passwordMinLength": "Password must be at least 8 characters",
     "passwordsDoNotMatch": "Passwords do not match",
+    "showPassword": "Afficher le mot de passe",
+    "hidePassword": "Masquer le mot de passe",
     "inviteInvalidOrExpired": "This link is invalid or has expired.",
     "backToLogin": "Back to Sign In",
     "logout": "Sign Out",

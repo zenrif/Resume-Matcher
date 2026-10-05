@@ -1208,6 +1208,8 @@
     "settingPassword": "Setting Password...",
     "passwordMinLength": "Password must be at least 8 characters",
     "passwordsDoNotMatch": "Passwords do not match",
+    "showPassword": "비밀번호 표시",
+    "hidePassword": "비밀번호 숨기기",
     "inviteInvalidOrExpired": "This link is invalid or has expired.",
     "backToLogin": "Back to Sign In",
     "logout": "Sign Out",

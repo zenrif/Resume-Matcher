@@ -1208,6 +1208,8 @@
     "settingPassword": "Mengatur Kata Sandi...",
     "passwordMinLength": "Kata sandi harus minimal 8 karakter",
     "passwordsDoNotMatch": "Kata sandi tidak cocok",
+    "showPassword": "Lihat kata sandi",
+    "hidePassword": "Sembunyikan kata sandi",
     "inviteInvalidOrExpired": "Tautan ini tidak valid atau sudah kedaluwarsa.",
     "backToLogin": "Kembali ke Halaman Masuk",
     "logout": "Keluar",

@@ -7,6 +7,8 @@ import { useParams } from 'next/navigation';
 import AlertTriangle from 'lucide-react/dist/esm/icons/alert-triangle';
 import ArrowLeft from 'lucide-react/dist/esm/icons/arrow-left';
 import CheckCircle2 from 'lucide-react/dist/esm/icons/check-circle-2';
+import Eye from 'lucide-react/dist/esm/icons/eye';
+import EyeOff from 'lucide-react/dist/esm/icons/eye-off';
 import Loader2 from 'lucide-react/dist/esm/icons/loader-2';
 
 import { acceptInvite, validateInvite, type InviteValidateResult } from '@/lib/api/auth';
@@ -26,6 +28,8 @@ export default function InvitePage() {
 
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [showPassword, setShowPassword] = useState(false);
+  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
   const [submitting, setSubmitting] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
@@ -166,17 +170,33 @@ export default function InvitePage() {
           <Label htmlFor="password" className="font-mono text-xs uppercase font-bold text-black">
             {t('auth.newPassword')}
           </Label>
-          <Input
-            id="password"
-            type="password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            placeholder={t('auth.passwordPlaceholder')}
-            required
-            autoComplete="new-password"
-            className="font-mono text-sm bg-white"
-            disabled={submitting}
-          />
+          <div className="relative">
+            <Input
+              id="password"
+              type={showPassword ? 'text' : 'password'}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder={t('auth.passwordPlaceholder')}
+              required
+              autoComplete="new-password"
+              className="font-mono text-sm bg-white pr-10"
+              disabled={submitting}
+            />
+            <button
+              type="button"
+              onClick={() => setShowPassword((prev) => !prev)}
+              className="absolute right-0 top-0 h-full px-3 flex items-center text-steel-grey hover:text-black focus:outline-none transition-colors"
+              aria-label={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+              title={showPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+              disabled={submitting}
+            >
+              {showPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
           <p className="text-[10px] font-mono text-steel-grey uppercase">
             {t('auth.passwordMinLength')}
           </p>
@@ -189,17 +209,33 @@ export default function InvitePage() {
           >
             {t('auth.confirmPassword')}
           </Label>
-          <Input
-            id="confirmPassword"
-            type="password"
-            value={confirmPassword}
-            onChange={(e) => setConfirmPassword(e.target.value)}
-            placeholder={t('auth.passwordPlaceholder')}
-            required
-            autoComplete="new-password"
-            className="font-mono text-sm bg-white"
-            disabled={submitting}
-          />
+          <div className="relative">
+            <Input
+              id="confirmPassword"
+              type={showConfirmPassword ? 'text' : 'password'}
+              value={confirmPassword}
+              onChange={(e) => setConfirmPassword(e.target.value)}
+              placeholder={t('auth.passwordPlaceholder')}
+              required
+              autoComplete="new-password"
+              className="font-mono text-sm bg-white pr-10"
+              disabled={submitting}
+            />
+            <button
+              type="button"
+              onClick={() => setShowConfirmPassword((prev) => !prev)}
+              className="absolute right-0 top-0 h-full px-3 flex items-center text-steel-grey hover:text-black focus:outline-none transition-colors"
+              aria-label={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+              title={showConfirmPassword ? t('auth.hidePassword') : t('auth.showPassword')}
+              disabled={submitting}
+            >
+              {showConfirmPassword ? (
+                <EyeOff className="w-4 h-4" />
+              ) : (
+                <Eye className="w-4 h-4" />
+              )}
+            </button>
+          </div>
         </div>
 
         <Button
