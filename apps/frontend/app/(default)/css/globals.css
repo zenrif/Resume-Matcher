@@ -63,8 +63,8 @@
   --shadow-sw-xl: 12px 12px 0px 0px #000000;
 
   /* Fonts */
-  --font-sans: 'Geist Sans', sans-serif;
-  --font-mono: 'Space Grotesk', monospace;
+  --font-sans: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
+  --font-mono: var(--font-space-grotesk), 'Space Grotesk', monospace;
 
   /* Animations */
   --animate-gradient: gradient 8s linear infinite;
@@ -77,8 +77,8 @@
 }
 
 :root {
-  --font-mono: 'Geist Mono', monospace;
-  --font-sans: 'Geist', sans-serif;
+  --font-mono: var(--font-space-grotesk), 'Space Grotesk', monospace;
+  --font-sans: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
 
   /* Swiss International Style Palette */
   --background: #f0f0e8; /* Canvas */

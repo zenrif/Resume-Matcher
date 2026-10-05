@@ -25,8 +25,8 @@ describe('InvitePage Password Visibility Toggle', () => {
 
   it('renders password inputs as password type by default and toggles visibility on button click', async () => {
     vi.mocked(authApi.validateInvite).mockResolvedValue({
-      valid: true,
       email: 'alex@example.com',
+      display_name: 'Alex',
       purpose: 'invite',
     });
 

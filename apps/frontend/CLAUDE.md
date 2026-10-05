@@ -22,7 +22,7 @@ App Router under `app/`. A `(default)` route group wraps the main app in provide
 | `/print/resumes/[id]` | `app/print/resumes/[id]/page.tsx` | **Server** | Print-only resume render for PDF (reads `searchParams` for template settings + `lang`) |
 | `/print/cover-letter/[id]` | `app/print/cover-letter/[id]/page.tsx` | **Server** | Print-only cover-letter render for PDF |
 
-`app/layout.tsx` (root) wires fonts (Geist + Space Grotesk) and global CSS. `app/(default)/layout.tsx` nests providers: `StatusCacheProvider` → `LanguageProvider` → `ResumePreviewProvider` → `LocalizedErrorBoundary`.
+`app/layout.tsx` (root) wires fonts (Plus Jakarta Sans + Space Grotesk) and global CSS. `app/(default)/layout.tsx` nests providers: `StatusCacheProvider` → `LanguageProvider` → `ResumePreviewProvider` → `LocalizedErrorBoundary`.
 
 > Most pages are `'use client'`. The `print/*` pages are intentionally server components and fetch from the backend directly via `API_BASE` + `lib/i18n/server.ts` (`translate`). Do not add `'use client'` to them.
 
@@ -134,7 +134,7 @@ Tailwind v4, configured **in CSS** (`app/(default)/css/globals.css`, `@theme inl
 | Alert Red (error) | `#DC2626` | `text-destructive` |
 | Neutrals | `paper-tint`, `steel-grey`, `ink-soft` (OKLCH) | use these, not ad-hoc grays |
 
-Conventions: `rounded-none` everywhere (no radius tokens exist — square corners are intentional). 1px black borders (`border border-black`). **Hard offset shadows** `shadow-sw-xs … shadow-sw-xl` (solid ink, no blur). Fonts: serif headers / `font-sans` (Geist) body / `font-mono` (Space Grotesk) metadata.
+Conventions: `rounded-none` everywhere (no radius tokens exist — square corners are intentional). 1px black borders (`border border-black`). **Hard offset shadows** `shadow-sw-xs … shadow-sw-xl` (solid ink, no blur). Fonts: serif headers / `font-sans` (Plus Jakarta Sans) body / `font-mono` (Space Grotesk) metadata.
 
 Resume render templates have their own CSS modules in `components/resume/styles/` (`_tokens.css`, `swiss-single`, `swiss-two-column`, `modern`, `modern-two-column`). Template types/settings: `lib/types/template-settings.ts`. See [resume-templates.md](../../docs/agent/features/resume-templates.md), [template-system.md](../../docs/agent/design/template-system.md), [pdf-template-guide.md](../../docs/agent/design/pdf-template-guide.md), [adding-resume-templates.md](../../docs/agent/features/adding-resume-templates.md).
 
