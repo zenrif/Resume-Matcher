@@ -1,6 +1,6 @@
 'use client';
 
-import React, { useEffect, useMemo, useState, useRef, useLayoutEffect } from 'react';
+import React, { useEffect, useMemo, useState, useRef, useLayoutEffect, useCallback } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { ConfirmDialog } from '@/components/ui/confirm-dialog';
@@ -29,6 +29,8 @@ import {
 } from 'lucide-react';
 import { EnrichmentModal } from '@/components/enrichment/enrichment-modal';
 import { useTranslations } from '@/lib/i18n';
+import { translate } from '@/lib/i18n/translations';
+import { resolveLocale } from '@/lib/i18n/locale';
 import { withLocalizedDefaultSections } from '@/lib/utils/section-helpers';
 import { useLanguage } from '@/lib/context/language-context';
 import { downloadBlobAsFile, openUrlInNewTab, sanitizeFilename } from '@/lib/utils/download';
@@ -42,7 +44,7 @@ export default function ResumeViewerPage() {
   useLayoutEffect(() => {
     translationsRef.current = t;
   }, [t]);
-  const { uiLanguage } = useLanguage();
+  const { uiLanguage, contentLanguage } = useLanguage();
   const params = useParams();
   const router = useRouter();
   const { incrementResumes, decrementResumes, setHasMasterResume } = useStatusCache();
@@ -85,10 +87,21 @@ export default function ResumeViewerPage() {
   const { begin: beginSetDefault, isCurrent: isCurrentSetDefault } = useOperationOwner(resumeId);
   const { begin: beginDuplicate, isCurrent: isCurrentDuplicate } = useOperationOwner(resumeId);
 
+  const docLocale = resolveLocale(resumeData?.language || contentLanguage);
+  const docTranslate = useCallback(
+    (key: string, params?: Record<string, string | number>) => {
+      if (typeof translate === 'function') {
+        return translate(docLocale, key, params);
+      }
+      return t(key, params);
+    },
+    [docLocale, t]
+  );
+
   const localizedResumeData = useMemo(() => {
     if (!resumeData) return null;
-    return withLocalizedDefaultSections(resumeData, t);
-  }, [resumeData, t]);
+    return withLocalizedDefaultSections(resumeData, docTranslate);
+  }, [resumeData, docTranslate]);
 
   useEffect(() => {
     if (!resumeId) return;
@@ -602,24 +615,25 @@ export default function ResumeViewerPage() {
           <div className="resume-print w-full max-w-[250mm] shadow-sw-lg border-2 border-black bg-white">
             <Resume
               resumeData={localizedResumeData || resumeData}
+              locale={docLocale}
               additionalSectionLabels={{
-                technicalSkills: t('resume.additionalLabels.technicalSkills'),
-                languages: t('resume.additionalLabels.languages'),
-                certifications: t('resume.additionalLabels.certifications'),
-                awards: t('resume.additionalLabels.awards'),
+                technicalSkills: docTranslate('resume.additionalLabels.technicalSkills'),
+                languages: docTranslate('resume.additionalLabels.languages'),
+                certifications: docTranslate('resume.additionalLabels.certifications'),
+                awards: docTranslate('resume.additionalLabels.awards'),
               }}
               sectionHeadings={{
-                summary: t('resume.sections.summary'),
-                experience: t('resume.sections.experience'),
-                education: t('resume.sections.education'),
-                projects: t('resume.sections.projects'),
-                certifications: t('resume.sections.certifications'),
-                skills: t('resume.sections.skillsOnly'),
-                languages: t('resume.sections.languages'),
-                awards: t('resume.sections.awards'),
-                links: t('resume.sections.links'),
+                summary: docTranslate('resume.sections.summary'),
+                experience: docTranslate('resume.sections.experience'),
+                education: docTranslate('resume.sections.education'),
+                projects: docTranslate('resume.sections.projects'),
+                certifications: docTranslate('resume.sections.certifications'),
+                skills: docTranslate('resume.sections.skillsOnly'),
+                languages: docTranslate('resume.sections.languages'),
+                awards: docTranslate('resume.sections.awards'),
+                links: docTranslate('resume.sections.links'),
               }}
-              fallbackLabels={{ name: t('resume.defaults.name') }}
+              fallbackLabels={{ name: docTranslate('resume.defaults.name') }}
             />
           </div>
         </div>

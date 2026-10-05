@@ -564,6 +564,7 @@ def finalize_ai_resume(
     )
     if "sectionMeta" in source:
         result["sectionMeta"] = copy.deepcopy(source["sectionMeta"])
+    result["language"] = candidate.get("language") or source.get("language") or "en"
     return result
 
 

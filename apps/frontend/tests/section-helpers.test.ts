@@ -107,6 +107,14 @@ describe('localizeDefaultSectionMeta', () => {
     expect(out[0].displayName).toBe('My Story');
   });
 
+  it('localizes a default section whose name is a recognized default in another locale (e.g. Indonesian)', () => {
+    const out = localizeDefaultSectionMeta(
+      [meta({ id: 'summary', displayName: 'Ringkasan', isDefault: true })],
+      t
+    );
+    expect(out[0].displayName).toBe('t:resume.sections.summary');
+  });
+
   it('leaves non-default (custom) sections untouched', () => {
     const out = localizeDefaultSectionMeta(
       [meta({ id: 'custom_1', displayName: 'Summary', isDefault: false })],

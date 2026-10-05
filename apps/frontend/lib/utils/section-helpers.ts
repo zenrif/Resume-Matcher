@@ -6,6 +6,8 @@
  */
 
 import type { ResumeData, SectionMeta, SectionType } from '@/components/dashboard/resume-component';
+import { getMessages } from '@/lib/i18n/messages';
+import { locales } from '@/i18n/config';
 
 export type TranslationFunction = (key: string, params?: Record<string, string | number>) => string;
 
@@ -83,12 +85,44 @@ const DEFAULT_SECTION_I18N_KEY_BY_ID: Readonly<Record<string, string>> = Object.
   additional: 'resume.sections.skills',
 });
 
+const ALL_DEFAULT_NAMES_BY_SECTION_ID: Readonly<Record<string, ReadonlySet<string>>> = Object.freeze(
+  Object.fromEntries(
+    Object.entries(DEFAULT_SECTION_I18N_KEY_BY_ID).map(([sectionId, i18nKey]) => {
+      const names = new Set<string>();
+      const enDefault = DEFAULT_SECTION_DISPLAY_NAME_BY_ID[sectionId];
+      if (enDefault) names.add(enDefault);
+
+      for (const loc of locales) {
+        try {
+          const msgs = getMessages(loc);
+          const parts = i18nKey.split('.');
+          let val: unknown = msgs;
+          for (const p of parts) {
+            if (val && typeof val === 'object' && p in val) {
+              val = (val as Record<string, unknown>)[p];
+            } else {
+              val = undefined;
+              break;
+            }
+          }
+          if (typeof val === 'string' && val.trim()) {
+            names.add(val.trim());
+          }
+        } catch {
+          // ignore if locale message unavailable
+        }
+      }
+      return [sectionId, names];
+    })
+  )
+);
+
 /**
  * Localize default section display names without overwriting user customizations.
  *
  * Rules:
  * - Only affects built-in sections (isDefault === true)
- * - Only overwrites when the displayName still equals the original English default
+ * - Only overwrites when displayName matches a recognized default title in any supported language
  */
 export function localizeDefaultSectionMeta(
   sections: SectionMeta[],
@@ -100,10 +134,12 @@ export function localizeDefaultSectionMeta(
     const i18nKey = DEFAULT_SECTION_I18N_KEY_BY_ID[section.id];
     if (!i18nKey) return section;
 
-    const defaultDisplayName = DEFAULT_SECTION_DISPLAY_NAME_BY_ID[section.id];
-    if (!defaultDisplayName) return section;
+    const defaultNames = ALL_DEFAULT_NAMES_BY_SECTION_ID[section.id];
+    const isRecognizedDefault =
+      section.displayName === DEFAULT_SECTION_DISPLAY_NAME_BY_ID[section.id] ||
+      (defaultNames ? defaultNames.has(section.displayName) : false);
 
-    if (section.displayName !== defaultDisplayName) return section;
+    if (!isRecognizedDefault) return section;
 
     return { ...section, displayName: t(i18nKey) };
   });

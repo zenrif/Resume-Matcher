@@ -420,6 +420,7 @@ class ResumeData(BaseModel):
     # NEW: Section metadata and custom sections
     sectionMeta: list[SectionMeta] = Field(default_factory=list)
     customSections: dict[str, CustomSection] = Field(default_factory=dict)
+    language: str = "en"
 
     @field_validator("summary", mode="before")
     @classmethod

@@ -185,7 +185,7 @@ export default async function PrintResumePage({ params, searchParams }: PageProp
     });
     return <div data-print-error="draft-unavailable">Draft unavailable</div>;
   }
-  const locale = resolveLocale(resolvedSearchParams?.lang);
+  const locale = resolveLocale(resolvedSearchParams?.lang || resumeData.language);
   const t = (key: string, params?: Record<string, string | number>) =>
     translate(locale, key, params);
   const localizedResumeData = withLocalizedDefaultSections(resumeData, t);

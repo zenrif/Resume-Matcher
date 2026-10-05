@@ -49,6 +49,8 @@ import { JDComparisonView } from './jd-comparison-view';
 import { RegenerateWizard } from './regenerate-wizard';
 import { useRegenerateWizard } from '@/hooks/use-regenerate-wizard';
 import { useTranslations } from '@/lib/i18n';
+import { translate } from '@/lib/i18n/translations';
+import { resolveLocale } from '@/lib/i18n/locale';
 import { type TemplateSettings } from '@/lib/types/template-settings';
 import {
   TEMPLATE_SETTINGS_STORAGE_KEY,
@@ -387,9 +389,19 @@ const ResumeBuilderContent = () => {
     }
     return null;
   }, [canonicalResumeDataForPreview.additional?.technicalSkills, t]);
+  const docLocale = resolveLocale(canonicalResumeDataForPreview.language || contentLanguage);
+  const docTranslate = useCallback(
+    (key: string, params?: Record<string, string | number>) => {
+      if (typeof translate === 'function') {
+        return translate(docLocale, key, params);
+      }
+      return t(key, params);
+    },
+    [docLocale, t]
+  );
   const localizedResumeDataForPreview = useMemo(
-    () => withLocalizedDefaultSections(canonicalResumeDataForPreview, t),
-    [canonicalResumeDataForPreview, t]
+    () => withLocalizedDefaultSections(canonicalResumeDataForPreview, docTranslate),
+    [canonicalResumeDataForPreview, docTranslate]
   );
 
   // Save template settings to localStorage when they change

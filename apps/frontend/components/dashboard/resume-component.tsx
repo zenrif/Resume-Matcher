@@ -129,6 +129,7 @@ export interface ResumeData {
   // NEW: Section metadata and custom sections
   sectionMeta?: SectionMeta[];
   customSections?: Record<string, CustomSection>;
+  language?: string;
 }
 
 interface ResumeProps {

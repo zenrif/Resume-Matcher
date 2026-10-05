@@ -9,7 +9,10 @@ import { PageContainer } from './page-container';
 import { usePagination } from './use-pagination';
 import { PAGE_DIMENSIONS, mmToPx, getContentAreaPx } from '@/lib/constants/page-dimensions';
 import { useTranslations } from '@/lib/i18n';
+import { translate } from '@/lib/i18n/translations';
 import { useLanguage } from '@/lib/context/language-context';
+import { resolveLocale } from '@/lib/i18n/locale';
+import { withLocalizedDefaultSections } from '@/lib/utils/section-helpers';
 
 interface PaginatedPreviewProps {
   resumeData: ResumeData;
@@ -28,6 +31,16 @@ export function PaginatedPreview({ resumeData, settings }: PaginatedPreviewProps
   const { t } = useTranslations();
   // Orders the CJK font fallback so the preview matches the generated PDF.
   const { contentLanguage } = useLanguage();
+  const docLocale = resolveLocale(resumeData.language || contentLanguage);
+  const docTranslate = useCallback(
+    (key: string, params?: Record<string, string | number>) => {
+      if (typeof translate === 'function') {
+        return translate(docLocale, key, params);
+      }
+      return t(key, params);
+    },
+    [docLocale, t]
+  );
   const measurementRef = useRef<HTMLDivElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const [zoom, setZoom] = useState(0.6);
@@ -38,34 +51,39 @@ export function PaginatedPreview({ resumeData, settings }: PaginatedPreviewProps
     margins: { top: 0, bottom: 0, left: 0, right: 0 },
   };
 
+  const localizedResumeData = React.useMemo(
+    () => withLocalizedDefaultSections(resumeData, docTranslate),
+    [resumeData, docTranslate]
+  );
+
   const additionalSectionLabels = React.useMemo(
     () => ({
-      technicalSkills: t('resume.additionalLabels.technicalSkills'),
-      languages: t('resume.additionalLabels.languages'),
-      certifications: t('resume.additionalLabels.certifications'),
-      awards: t('resume.additionalLabels.awards'),
+      technicalSkills: docTranslate('resume.additionalLabels.technicalSkills'),
+      languages: docTranslate('resume.additionalLabels.languages'),
+      certifications: docTranslate('resume.additionalLabels.certifications'),
+      awards: docTranslate('resume.additionalLabels.awards'),
     }),
-    [t]
+    [docTranslate]
   );
   const sectionHeadings = React.useMemo(
     () => ({
-      summary: t('resume.sections.summary'),
-      experience: t('resume.sections.experience'),
-      education: t('resume.sections.education'),
-      projects: t('resume.sections.projects'),
-      certifications: t('resume.sections.certifications'),
-      skills: t('resume.sections.skillsOnly'),
-      languages: t('resume.sections.languages'),
-      awards: t('resume.sections.awards'),
-      links: t('resume.sections.links'),
+      summary: docTranslate('resume.sections.summary'),
+      experience: docTranslate('resume.sections.experience'),
+      education: docTranslate('resume.sections.education'),
+      projects: docTranslate('resume.sections.projects'),
+      certifications: docTranslate('resume.sections.certifications'),
+      skills: docTranslate('resume.sections.skillsOnly'),
+      languages: docTranslate('resume.sections.languages'),
+      awards: docTranslate('resume.sections.awards'),
+      links: docTranslate('resume.sections.links'),
     }),
-    [t]
+    [docTranslate]
   );
   const fallbackLabels = React.useMemo(
     () => ({
-      name: t('resume.defaults.name'),
+      name: docTranslate('resume.defaults.name'),
     }),
-    [t]
+    [docTranslate]
   );
 
   const { pages, isCalculating } = usePagination({
@@ -181,10 +199,10 @@ export function PaginatedPreview({ resumeData, settings }: PaginatedPreviewProps
           aria-hidden="true"
         >
           <Resume
-            resumeData={resumeData}
+            resumeData={localizedResumeData}
             template={settings.template}
             settings={resumeSettings}
-            locale={contentLanguage}
+            locale={docLocale}
             additionalSectionLabels={additionalSectionLabels}
             sectionHeadings={sectionHeadings}
             fallbackLabels={fallbackLabels}
@@ -215,10 +233,10 @@ export function PaginatedPreview({ resumeData, settings }: PaginatedPreviewProps
                 contentEnd={page.contentEnd}
               >
                 <Resume
-                  resumeData={resumeData}
+                  resumeData={localizedResumeData}
                   template={settings.template}
                   settings={resumeSettings}
-                  locale={contentLanguage}
+                  locale={docLocale}
                   additionalSectionLabels={additionalSectionLabels}
                   sectionHeadings={sectionHeadings}
                   fallbackLabels={fallbackLabels}

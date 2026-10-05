@@ -845,5 +845,9 @@ async def parse_resume_to_json(markdown_text: str) -> dict[str, Any]:
     # Patch dates: restore months the LLM may have dropped
     result = restore_dates_from_markdown(result, markdown_text)
 
+    # Detect language of the resume content and store in result
+    from app.services.language_detector import detect_language
+    result["language"] = detect_language(markdown_text, default="en")
+
     # Validate against schema
     return _validate_parsed_resume(result)

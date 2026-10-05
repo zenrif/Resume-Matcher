@@ -27,6 +27,7 @@ from app.ai_budget import (
     remaining_timeout,
 )
 from app.config_cache import get_content_language, load_config as _load_config
+from app.services.language_detector import detect_language
 from app.database import (
     DatabaseBusyError,
     MasterResumeLimitError,
@@ -1209,7 +1210,7 @@ async def improve_resume_preview_endpoint(
         raise HTTPException(status_code=404, detail="Job description not found")
 
     _validate_ai_sources(resume, job)
-    language = get_content_language()
+    language = detect_language(job.get("content"), default=get_content_language())
     prompt_id = request.prompt_id or _get_default_prompt_id()
 
     progress = {"stage": "load_job_keywords"}
@@ -1483,6 +1484,8 @@ async def _improve_preview_flow(
             allow_appended_rows=allow_appended_rows,
             fixed_row_sections=fixed_row_sections,
         )
+    improved_data["language"] = language
+    if original_resume_data:
         response_warnings.extend(
             grounding_review_warnings(original_resume_data, improved_data)
         )
@@ -1609,12 +1612,17 @@ async def improve_resume_confirm_endpoint(
             return ImproveResumeResponse(request_id=data.request_id, data=data)
 
         feature_config = _load_config()
-        language = get_content_language()
+        language = detect_language(
+            job.get("content"),
+            default=improved_data.get("language") or get_content_language(),
+        )
 
         try:
             original = claim.source_data or _get_original_resume_data(resume)
             if original is None:
                 raise ValueError("Original resume data is unavailable; process the source before preview")
+            if "language" not in improved_data:
+                improved_data["language"] = language
             canonical = ResumeData.model_validate(
                 finalize_ai_resume(original, improved_data, allow_appended_rows=True)
             ).model_dump()
@@ -1760,7 +1768,7 @@ async def improve_resume_endpoint(
     enable_outreach = feature_config.get("enable_outreach_message", False)
     enable_interview_prep = feature_config.get("enable_interview_prep", False)
     _validate_ai_sources(resume, job)
-    language = get_content_language()
+    language = detect_language(job.get("content"), default=get_content_language())
 
     try:
         # Extract keywords from job description
@@ -1881,6 +1889,8 @@ async def improve_resume_endpoint(
                 allow_review_claims=False,
                 allow_appended_rows=allow_appended_rows,
             )
+        improved_data["language"] = language
+        if original_resume_data:
             response_warnings.extend(
                 grounding_review_warnings(original_resume_data, improved_data)
             )
@@ -2439,7 +2449,10 @@ async def generate_cover_letter_endpoint(resume_id: str) -> GenerateContentRespo
 
     # Get language setting
     _validate_ai_sources(resume, job)
-    language = get_content_language()
+    language = detect_language(
+        job.get("content"),
+        default=resume_data.get("language") or get_content_language(),
+    )
 
     # Generate cover letter
     try:
@@ -2517,7 +2530,10 @@ async def generate_outreach_endpoint(resume_id: str) -> GenerateContentResponse:
 
     # Get language setting
     _validate_ai_sources(resume, job)
-    language = get_content_language()
+    language = detect_language(
+        job.get("content"),
+        default=resume_data.get("language") or get_content_language(),
+    )
 
     # Generate outreach message
     try:
@@ -2585,7 +2601,10 @@ async def generate_interview_prep_endpoint(
         )
 
     _validate_ai_sources(resume, job)
-    language = get_content_language()
+    language = detect_language(
+        job.get("content"),
+        default=resume_data.get("language") or get_content_language(),
+    )
 
     try:
         interview_prep = await generate_interview_prep(
