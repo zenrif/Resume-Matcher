@@ -35,6 +35,10 @@ export interface ChangePasswordPayload {
   new_password: string;
 }
 
+export interface UpdateProfilePayload {
+  display_name: string;
+}
+
 export interface InviteValidateResult {
   email: string;
   display_name: string;
@@ -98,6 +102,15 @@ export async function changePassword(payload: ChangePasswordPayload): Promise<vo
     const errorBody = await res.text();
     throw new Error(parseErrorDetail(errorBody) || 'Failed to change password');
   }
+}
+
+export async function updateProfile(payload: UpdateProfilePayload): Promise<UserMe> {
+  const res = await apiPatch<UpdateProfilePayload>('/auth/me', payload);
+  if (!res.ok) {
+    const errorBody = await res.text();
+    throw new Error(parseErrorDetail(errorBody) || 'Failed to update profile');
+  }
+  return res.json();
 }
 
 export async function validateInvite(token: string): Promise<InviteValidateResult> {

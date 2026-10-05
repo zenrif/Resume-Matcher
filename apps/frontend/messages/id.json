@@ -816,6 +816,13 @@
     "account": {
       "title": "Akun & Kuota",
       "subtitle": "Kelola kredensial dan batas AI harian Anda",
+      "profileTitle": "Informasi Profil",
+      "displayName": "Nama Tampilan",
+      "displayNamePlaceholder": "Masukkan nama Anda",
+      "displayNameRequired": "Nama tampilan tidak boleh kosong",
+      "saveProfile": "Simpan Profil",
+      "savingProfile": "Menyimpan...",
+      "profileUpdated": "Profil berhasil diperbarui",
       "changePassword": "Ubah Kata Sandi",
       "currentPassword": "Kata Sandi Saat Ini",
       "newPassword": "Kata Sandi Baru",

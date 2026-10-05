@@ -816,6 +816,13 @@
     "account": {
       "title": "Account & Quota",
       "subtitle": "Manage your credentials and daily AI limit",
+      "profileTitle": "Información del perfil",
+      "displayName": "Nombre para mostrar",
+      "displayNamePlaceholder": "Ingresa tu nombre",
+      "displayNameRequired": "El nombre para mostrar no puede estar vacío",
+      "saveProfile": "Guardar perfil",
+      "savingProfile": "Guardando...",
+      "profileUpdated": "Perfil actualizado exitosamente",
       "changePassword": "Change Password",
       "currentPassword": "Current Password",
       "newPassword": "New Password",

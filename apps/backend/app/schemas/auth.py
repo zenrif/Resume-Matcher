@@ -60,6 +60,22 @@ class ChangePasswordRequest(BaseModel):
     new_password: str = Field(..., description="New password")
 
 
+class UpdateProfileRequest(BaseModel):
+    """Self-service profile update request body."""
+
+    display_name: str = Field(..., description="User's display name")
+
+    @field_validator("display_name", mode="before")
+    @classmethod
+    def validate_display_name(cls, v: Any) -> str:
+        if not isinstance(v, str) or not v.strip():
+            raise ValueError("Display name must not be empty.")
+        trimmed = v.strip()
+        if len(trimmed) > 100:
+            raise ValueError("Display name must not exceed 100 characters.")
+        return trimmed
+
+
 class InviteValidateResponse(BaseModel):
     """Validation response for invite or reset token."""
 

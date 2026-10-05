@@ -339,3 +339,68 @@ class TestAuthApi:
             resp = await client.get("/api/v1/auth/me", cookies={COOKIE_NAME: token})
             assert resp.status_code == 200
             assert resp.json()["id"] == user_id
+
+    async def test_update_display_name_success(self, client: AsyncClient, auth_db: Database) -> None:
+        user_id = str(uuid4())
+        await auth_db.create_user(
+            id=user_id,
+            email="update_profile@example.com",
+            display_name="Old Name",
+            password_hash=hash_password("pw"),
+            role="user",
+            is_active=True,
+        )
+
+        token = generate_token()
+        future = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+        await auth_db.create_session(token_hash=hash_token(token), user_id=user_id, expires_at=future)
+
+        async with client:
+            # 1. Update display name
+            resp = await client.patch(
+                "/api/v1/auth/me",
+                json={"display_name": "New Display Name"},
+                cookies={COOKIE_NAME: token},
+            )
+            assert resp.status_code == 200
+            data = resp.json()
+            assert data["id"] == user_id
+            assert data["display_name"] == "New Display Name"
+
+            # 2. Verify with GET /me
+            resp_me = await client.get("/api/v1/auth/me", cookies={COOKIE_NAME: token})
+            assert resp_me.status_code == 200
+            assert resp_me.json()["display_name"] == "New Display Name"
+
+    async def test_update_display_name_validation_fails(self, client: AsyncClient, auth_db: Database) -> None:
+        user_id = str(uuid4())
+        await auth_db.create_user(
+            id=user_id,
+            email="validation@example.com",
+            display_name="Valid Name",
+            password_hash=hash_password("pw"),
+            role="user",
+            is_active=True,
+        )
+
+        token = generate_token()
+        future = (datetime.now(timezone.utc) + timedelta(days=1)).isoformat()
+        await auth_db.create_session(token_hash=hash_token(token), user_id=user_id, expires_at=future)
+
+        async with client:
+            # Empty or whitespace only string
+            resp = await client.patch(
+                "/api/v1/auth/me",
+                json={"display_name": "   "},
+                cookies={COOKIE_NAME: token},
+            )
+            assert resp.status_code == 422
+
+    async def test_update_display_name_unauthenticated(self, client: AsyncClient) -> None:
+        async with client:
+            resp = await client.patch(
+                "/api/v1/auth/me",
+                json={"display_name": "Anonymous Name"},
+            )
+            assert resp.status_code == 401
+

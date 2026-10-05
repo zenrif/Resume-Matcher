@@ -21,6 +21,7 @@ from app.schemas.auth import (
     InviteValidateResponse,
     LoginRequest,
     LoginResponse,
+    UpdateProfileRequest,
     UserMeResponse,
     UserResponse,
 )
@@ -122,6 +123,31 @@ async def me(
         role=user["role"],
         content_language=user.get("content_language", "id"),
         daily_ai_limit=user.get("daily_ai_limit"),
+        ai_used_today=ai_used,
+    )
+
+
+@router.patch("/me", response_model=UserMeResponse)
+async def update_profile(
+    payload: UpdateProfileRequest,
+    user: dict[str, Any] = Depends(require_user),
+) -> Any:
+    """Update the current authenticated user's display name."""
+    updated = await db.update_user(user["id"], display_name=payload.display_name)
+    if not updated:
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND,
+            detail="User not found.",
+        )
+    today = current_jakarta_day()
+    ai_used = await db.get_ai_usage_today(user_id=user["id"], day=today)
+    return UserMeResponse(
+        id=updated["id"],
+        email=updated["email"],
+        display_name=updated["display_name"],
+        role=updated["role"],
+        content_language=updated.get("content_language", "id"),
+        daily_ai_limit=updated.get("daily_ai_limit"),
         ai_used_today=ai_used,
     )
 

@@ -816,6 +816,13 @@
     "account": {
       "title": "Account & Quota",
       "subtitle": "Manage your credentials and daily AI limit",
+      "profileTitle": "프로필 정보",
+      "displayName": "표시 이름",
+      "displayNamePlaceholder": "이름을 입력하세요",
+      "displayNameRequired": "표시 이름을 입력해야 합니다",
+      "saveProfile": "프로필 저장",
+      "savingProfile": "저장 중...",
+      "profileUpdated": "프로필이 성공적으로 업데이트되었습니다",
       "changePassword": "Change Password",
       "currentPassword": "Current Password",
       "newPassword": "New Password",
