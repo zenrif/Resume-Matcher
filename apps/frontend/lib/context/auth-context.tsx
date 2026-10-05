@@ -63,6 +63,10 @@ export function useAuth(): AuthContextType {
   return context;
 }
 
+export function useOptionalAuth(): AuthContextType | undefined {
+  return useContext(AuthContext);
+}
+
 /**
  * Gate component that prevents children from rendering until auth state is known.
  * If unauthenticated, redirects to `/login?next=<path>` with open-redirect guards.

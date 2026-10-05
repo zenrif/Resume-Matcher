@@ -1365,29 +1365,34 @@ const ResumeBuilderContent = () => {
   const ResumeSaveStatusIcon = resumeSaveStatus?.tone === 'green' ? Check : AlertTriangle;
 
   return (
-    <div className="h-screen w-full bg-background flex justify-center items-center p-4 md:p-8">
+    <div className="h-screen w-full bg-background flex justify-center items-center p-2 sm:p-4 md:p-6">
       {/* Main Container */}
-      <div className="w-full h-full max-w-[90%] md:max-w-[95%] xl:max-w-[1800px] border border-black bg-background shadow-sw-lg flex flex-col">
+      <div className="w-full h-full max-w-[95%] xl:max-w-[1800px] border border-black bg-background shadow-sw-lg flex flex-col">
         {/* Header Section */}
-        <div className="border-b border-black p-6 md:p-8 bg-background no-print">
-          {/* Top Row: Back button and Actions */}
-          <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-6">
-            <div>
-              <Button variant="link" onClick={handleBackToDashboard} className="mb-2 -ml-1">
-                <ArrowLeft className="w-4 h-4" />
+        <div className="border-b border-black py-3 px-4 md:py-3.5 md:px-6 bg-background no-print shrink-0">
+          {/* Top Row: Back button, Title, Subtitle, and Actions */}
+          <div className="flex flex-col lg:flex-row justify-between items-start lg:items-center gap-3">
+            <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5">
+              <Button
+                variant="link"
+                onClick={handleBackToDashboard}
+                className="h-auto p-0 text-xs md:text-sm font-mono text-ink-soft hover:text-black"
+              >
+                <ArrowLeft className="w-3.5 h-3.5 mr-1" />
                 {t('nav.backToDashboard')}
               </Button>
-              <h1 className="font-serif text-3xl md:text-5xl text-black tracking-tight leading-[0.95] uppercase">
+              <span className="text-steel-grey font-mono text-xs hidden sm:inline">/</span>
+              <h1 className="font-serif text-xl md:text-2xl lg:text-3xl text-black tracking-tight leading-none uppercase font-bold">
                 {t('nav.builder')}
               </h1>
-              <div className="mt-3 flex items-center gap-3">
-                <p className="text-sm font-mono text-blue-700 uppercase tracking-wide font-bold">
+              <div className="flex items-center gap-2">
+                <p className="text-xs font-mono text-blue-700 uppercase tracking-wide font-bold">
                   {'// '}
                   {resumeId ? t('builder.editMode') : t('builder.createAndPreview')}
                 </p>
                 {resumeSaveStatus && (
                   <span
-                    className={`flex items-center gap-1 text-xs font-mono px-2 py-1 border ${resumeSaveStatusStyles[resumeSaveStatus.tone]}`}
+                    className={`flex items-center gap-1 text-[11px] font-mono px-1.5 py-0.5 border ${resumeSaveStatusStyles[resumeSaveStatus.tone]}`}
                   >
                     <ResumeSaveStatusIcon className="w-3 h-3" />
                     {resumeSaveStatus.label}
@@ -1396,7 +1401,7 @@ const ResumeBuilderContent = () => {
               </div>
             </div>
 
-            <div className="flex gap-3 mt-4 md:mt-0">
+            <div className="flex flex-wrap items-center gap-2">
               {/* Resume tab actions */}
               {activeTab === 'resume' && (
                 <>

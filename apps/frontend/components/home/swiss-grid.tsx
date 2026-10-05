@@ -6,16 +6,18 @@ import Link from 'next/link';
 import LayoutGrid from 'lucide-react/dist/esm/icons/layout-grid';
 import LogOut from 'lucide-react/dist/esm/icons/log-out';
 import { useTranslations } from '@/lib/i18n';
-import { useAuth } from '@/lib/context/auth-context';
+import { useOptionalAuth } from '@/lib/context/auth-context';
 
 export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
   const { t } = useTranslations();
-  const { user, logout } = useAuth();
+  const auth = useOptionalAuth();
+  const user = auth?.user ?? null;
+  const logout = auth?.logout ?? (() => Promise.resolve());
 
   return (
     // 1. Outer Wrapper: Fixed height with grid background
     <div
-      className="h-screen w-full flex justify-center items-start py-12 px-4 md:px-8 overflow-hidden bg-background"
+      className="h-screen w-full flex justify-center items-start py-4 sm:py-6 md:py-8 px-3 sm:px-4 md:px-8 overflow-hidden bg-background"
       style={{
         backgroundImage:
           'linear-gradient(rgba(29, 78, 216, 0.1) 1px, transparent 1px), linear-gradient(90deg, rgba(29, 78, 216, 0.1) 1px, transparent 1px)',
@@ -25,14 +27,16 @@ export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
       {/* 2. The Main Container: Sharp black borders, creating the "Canvas" */}
       <div className="w-full max-w-[86rem] max-h-full border border-black bg-background shadow-sw-lg flex flex-col overflow-hidden">
         {/* Header Section - stays above hovered cards */}
-        <div className="border-b border-black p-8 md:p-12 shrink-0 bg-background relative z-30">
-          <h1 className="font-serif text-5xl md:text-7xl text-black tracking-tight leading-[0.95] uppercase">
-            {t('nav.dashboard')}
-          </h1>
-          <p className="mt-6 text-sm font-mono text-blue-700 uppercase tracking-wide max-w-md font-bold">
-            {'// '}
-            {t('dashboard.selectModule')}
-          </p>
+        <div className="border-b border-black py-4 px-6 md:py-5 md:px-10 shrink-0 bg-background relative z-30">
+          <div className="flex flex-col sm:flex-row sm:items-baseline sm:justify-between gap-1 sm:gap-4">
+            <h1 className="font-serif text-3xl md:text-4xl lg:text-5xl text-black tracking-tight leading-none uppercase">
+              {t('nav.dashboard')}
+            </h1>
+            <p className="text-xs md:text-sm font-mono text-blue-700 uppercase tracking-wide font-bold shrink-0">
+              {'// '}
+              {t('dashboard.selectModule')}
+            </p>
+          </div>
         </div>
 
         {/* Content Grid - Scrollable area with NO padding.
