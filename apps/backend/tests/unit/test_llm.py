@@ -153,7 +153,7 @@ class TestProviderConfiguration:
 
     @patch("app.llm.litellm.get_model_info", side_effect=Exception("unknown model"))
     def test_unknown_models_keep_conservative_token_fallback(self, _mock_model_info):
-        assert get_safe_max_tokens("openai/custom-model") == 4096
+        assert get_safe_max_tokens("openai/custom-model") == 8192
 
     @patch("app.llm.litellm.get_model_info", side_effect=Exception("unknown model"))
     def test_opencode_hy3_gets_full_json_budget_when_unknown(self, _mock_model_info):

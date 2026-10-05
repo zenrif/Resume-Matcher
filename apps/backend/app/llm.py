@@ -1080,7 +1080,7 @@ def _is_response_format_unsupported(error: Exception) -> bool:
     return any(cue in msg for cue in rejection_cues)
 
 
-FALLBACK_MAX_TOKENS = 4096
+FALLBACK_MAX_TOKENS = 8192
 
 def get_safe_max_tokens(
     model_name: str,
