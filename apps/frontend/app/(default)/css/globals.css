@@ -54,7 +54,7 @@
   --color-warning: #f59e0b;
 
   /* Modern Refined Neutrals (Slate/Zinc palette) */
-  --color-paper-tint: #f1f5f9;
+  --color-paper-tint: var(--paper-tint, #f1f5f9);
   --color-steel-grey: #64748b;
   --color-ink-soft: #475569;
 
@@ -179,6 +179,7 @@
   /* Brand Tokens in Dark */
   --color-canvas: #090d16;
   --color-ink: #f8fafc;
+  --paper-tint: #1e293b;
   --color-paper-tint: #1e293b;
   --color-steel-grey: #94a3b8;
   --color-ink-soft: #cbd5e1;

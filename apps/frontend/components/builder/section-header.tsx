@@ -91,12 +91,14 @@ export const SectionHeader: React.FC<SectionHeaderProps> = ({
 
   return (
     <div
-      className={`space-y-0 border p-6 bg-white shadow-sw-default ${
-        isHidden ? 'border-dashed border-steel-grey opacity-60' : 'border-black'
+      className={`space-y-0 border p-6 bg-white dark:bg-slate-900 shadow-sw-xs rounded-xl ${
+        isHidden
+          ? 'border-dashed border-steel-grey/60 opacity-60'
+          : 'border-slate-200/90 dark:border-slate-800'
       }`}
     >
       {/* Section Header */}
-      <div className="flex justify-between items-center border-b border-black pb-2 mb-4">
+      <div className="flex justify-between items-center border-b border-slate-200/80 dark:border-slate-800 pb-2 mb-4">
         {/* Section Name (editable) */}
         <div className="flex items-center gap-2">
           {isEditing ? (

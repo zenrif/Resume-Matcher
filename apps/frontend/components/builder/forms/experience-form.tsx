@@ -166,7 +166,7 @@ export const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange }
       ) : (
         <SortableItemList id="experience-items" items={data} onReorder={onChange}>
           {(item) => (
-            <div className="p-6 border border-black bg-paper-tint relative group">
+            <div className="p-6 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-slate-50 dark:bg-slate-900/60 relative group shadow-sw-xs">
               <Button
                 variant="ghost"
                 size="icon"
@@ -245,7 +245,7 @@ export const ExperienceForm: React.FC<ExperienceFormProps> = ({ data, onChange }
                     variant="ghost"
                     size="sm"
                     onClick={() => handleAddDescription(item.id)}
-                    className="h-6 text-xs text-blue-700 hover:text-blue-800 hover:bg-blue-50"
+                    className="h-6 text-xs text-primary hover:text-primary/90 hover:bg-primary/10 dark:text-blue-400 dark:hover:bg-blue-950/40"
                   >
                     <Plus className="w-3 h-3 mr-1" />{' '}
                     {t('builder.genericItemForm.actions.addPoint')}
