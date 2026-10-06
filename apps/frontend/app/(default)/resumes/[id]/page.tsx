@@ -612,7 +612,10 @@ export default function ResumeViewerPage() {
 
         {/* Resume Viewer */}
         <div className="flex justify-center pb-4">
-          <div className="resume-print w-full max-w-[250mm] shadow-sw-lg border-2 border-black bg-white">
+          <div
+            className="resume-print resume-sheet w-full max-w-[250mm] shadow-sw-lg border-2 border-black bg-white text-black"
+            data-resume-sheet="true"
+          >
             <Resume
               resumeData={localizedResumeData || resumeData}
               locale={docLocale}

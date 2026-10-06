@@ -45,11 +45,12 @@ export function CoverLetterPreview({
   return (
     <div
       className={cn(
-        'bg-white border-2 border-black',
+        'resume-sheet bg-white text-black border-2 border-black',
         'shadow-sw-default',
         'overflow-hidden',
         className
       )}
+      data-resume-sheet="true"
     >
       {/* Letter Content */}
       <div
