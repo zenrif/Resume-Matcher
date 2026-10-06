@@ -84,10 +84,13 @@ const PROVIDERS: LLMProvider[] = [
   'ollama',
 ];
 
+import { ThemeToggle } from '@/components/common/theme-toggle';
+import Sun from 'lucide-react/dist/esm/icons/sun';
+
 const SEGMENTED_BUTTON_BASE =
-  'border border-black font-mono transition-all duration-150 ease-out shadow-sw-sm hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50';
-const SEGMENTED_BUTTON_ACTIVE = 'bg-blue-700 text-white border-black hover:bg-blue-800';
-const SEGMENTED_BUTTON_INACTIVE = 'bg-white text-black hover:bg-secondary';
+  'border border-slate-200 dark:border-slate-700 font-sans font-medium rounded-lg transition-all duration-150 ease-out shadow-sw-xs hover:border-slate-300 dark:hover:border-slate-600 disabled:cursor-not-allowed disabled:opacity-50';
+const SEGMENTED_BUTTON_ACTIVE = 'bg-primary text-white border-primary hover:bg-blue-600 shadow-sw-sm';
+const SEGMENTED_BUTTON_INACTIVE = 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800';
 
 const unwrapCodeBlock = (value?: string | null): string | null => {
   if (!value) return null;
@@ -690,14 +693,14 @@ export default function SettingsPage() {
 
   return (
     <div className="flex flex-col items-center justify-start p-4 sm:p-6 md:p-10 min-h-[100dvh] overflow-y-auto bg-background modern-grid-pattern">
-      <div className="w-full max-w-4xl rounded-2xl border border-slate-200/90 bg-white shadow-sw-card overflow-hidden">
+      <div className="w-full max-w-4xl rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sw-card overflow-hidden">
         {/* Header */}
-        <div className="border-b border-slate-100 p-6 md:p-8 bg-white/90 backdrop-blur-sm flex justify-between items-start">
+        <div className="border-b border-slate-100 dark:border-slate-800/80 p-6 md:p-8 bg-white/90 dark:bg-slate-900/90 backdrop-blur-sm flex justify-between items-start">
           <div>
-            <h1 className="font-sans text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
+            <h1 className="font-sans text-2xl md:text-3xl font-bold tracking-tight text-slate-900 dark:text-slate-100">
               {t('settings.title')}
             </h1>
-            <p className="font-sans text-xs md:text-sm text-slate-500 mt-1.5 tracking-normal">
+            <p className="font-sans text-xs md:text-sm text-slate-500 dark:text-slate-400 mt-1.5 tracking-normal">
               {t('settings.subtitle')}
             </p>
           </div>
@@ -712,14 +715,14 @@ export default function SettingsPage() {
         <div className="p-8 space-y-10">
           {/* API Key Not Configured Warning */}
           {isAdmin && !statusLoading && systemStatus && !systemStatus.llm_configured && (
-            <div className="border-2 border-amber-500 bg-amber-50 p-4 shadow-sw-default">
+            <div className="border border-amber-500/40 bg-amber-500/10 dark:bg-amber-500/5 p-4 rounded-xl shadow-sw-xs">
               <div className="flex items-start gap-3">
-                <div className="w-3 h-3 bg-amber-500 mt-1 shrink-0"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 mt-1 shrink-0"></div>
                 <div className="flex-1">
-                  <p className="font-mono text-sm font-bold uppercase tracking-wider text-amber-800">
+                  <p className="font-sans text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
                     {t('settings.setupRequired.title')}
                   </p>
-                  <p className="font-mono text-xs text-amber-700 mt-1">
+                  <p className="font-sans text-xs text-amber-700 dark:text-amber-400/90 mt-0.5 leading-relaxed">
                     {t('settings.setupRequired.description')}
                   </p>
                 </div>
@@ -791,20 +794,20 @@ export default function SettingsPage() {
               <div className="@container">
                 <div className="grid grid-cols-2 @3xl:grid-cols-4 gap-4">
                   {/* LLM Status */}
-                  <div className="border border-black bg-white p-4 shadow-sw-sm">
+                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sw-xs">
                     <div className="flex items-center gap-2 mb-2">
-                      <Server className="w-4 h-4 text-steel-grey" />
-                      <span className="font-mono text-xs uppercase text-steel-grey">
+                      <Server className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                      <span className="font-sans text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
                         {t('settings.statusCards.llm')}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
                       {systemStatus.llm_healthy ? (
-                        <CheckCircle2 className="w-5 h-5 text-green-600" />
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
                       ) : (
                         <XCircle className="w-5 h-5 text-red-500" />
                       )}
-                      <span className="font-mono text-sm font-bold">
+                      <span className="font-sans text-sm font-bold text-slate-900 dark:text-slate-100">
                         {systemStatus.llm_healthy
                           ? t('settings.statusValues.healthy')
                           : t('settings.statusValues.offline')}
@@ -813,43 +816,43 @@ export default function SettingsPage() {
                   </div>
 
                   {/* Database Status */}
-                  <div className="border border-black bg-white p-4 shadow-sw-sm">
+                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sw-xs">
                     <div className="flex items-center gap-2 mb-2">
-                      <Database className="w-4 h-4 text-steel-grey" />
-                      <span className="font-mono text-xs uppercase text-steel-grey">
+                      <Database className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                      <span className="font-sans text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
                         {t('settings.statusCards.database')}
                       </span>
                     </div>
                     <div className="flex items-center gap-2">
-                      <CheckCircle2 className="w-5 h-5 text-green-600" />
-                      <span className="font-mono text-sm font-bold">
+                      <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                      <span className="font-sans text-sm font-bold text-slate-900 dark:text-slate-100">
                         {t('settings.statusValues.connected')}
                       </span>
                     </div>
                   </div>
 
                   {/* Resumes Count */}
-                  <div className="border border-black bg-white p-4 shadow-sw-sm">
+                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sw-xs">
                     <div className="flex items-center gap-2 mb-2">
-                      <FileText className="w-4 h-4 text-steel-grey" />
-                      <span className="font-mono text-xs uppercase text-steel-grey">
+                      <FileText className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                      <span className="font-sans text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
                         {t('settings.statusCards.resumes')}
                       </span>
                     </div>
-                    <span className="font-mono text-2xl font-bold">
+                    <span className="font-sans text-2xl font-bold text-slate-900 dark:text-slate-100">
                       {systemStatus.database_stats.total_resumes}
                     </span>
                   </div>
 
                   {/* Jobs Count */}
-                  <div className="border border-black bg-white p-4 shadow-sw-sm">
+                  <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sw-xs">
                     <div className="flex items-center gap-2 mb-2">
-                      <Briefcase className="w-4 h-4 text-steel-grey" />
-                      <span className="font-mono text-xs uppercase text-steel-grey">
+                      <Briefcase className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                      <span className="font-sans text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
                         {t('settings.statusCards.jobs')}
                       </span>
                     </div>
-                    <span className="font-mono text-2xl font-bold">
+                    <span className="font-sans text-2xl font-bold text-slate-900 dark:text-slate-100">
                       {systemStatus.database_stats.total_jobs}
                     </span>
                   </div>
@@ -860,36 +863,36 @@ export default function SettingsPage() {
             {/* Additional Stats Row */}
             {systemStatus && (
               <div className="grid grid-cols-2 gap-4">
-                <div className="border border-black bg-white p-4 shadow-sw-sm">
+                <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sw-xs">
                   <div className="flex items-center gap-2 mb-2">
-                    <Sparkles className="w-4 h-4 text-steel-grey" />
-                    <span className="font-mono text-xs uppercase text-steel-grey">
+                    <Sparkles className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                    <span className="font-sans text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
                       {t('settings.statusCards.improvements')}
                     </span>
                   </div>
-                  <span className="font-mono text-2xl font-bold">
+                  <span className="font-sans text-2xl font-bold text-slate-900 dark:text-slate-100">
                     {systemStatus.database_stats.total_improvements}
                   </span>
                 </div>
-                <div className="border border-black bg-white p-4 shadow-sw-sm">
+                <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-4 shadow-sw-xs">
                   <div className="flex items-center gap-2 mb-2">
-                    <FileText className="w-4 h-4 text-steel-grey" />
-                    <span className="font-mono text-xs uppercase text-steel-grey">
+                    <FileText className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+                    <span className="font-sans text-xs uppercase font-semibold text-slate-500 dark:text-slate-400">
                       {t('settings.statusCards.masterResume')}
                     </span>
                   </div>
                   <div className="flex items-center gap-2">
                     {systemStatus.has_master_resume ? (
                       <>
-                        <CheckCircle2 className="w-5 h-5 text-green-600" />
-                        <span className="font-mono text-sm font-bold">
+                        <CheckCircle2 className="w-5 h-5 text-emerald-600 dark:text-emerald-400" />
+                        <span className="font-sans text-sm font-bold text-slate-900 dark:text-slate-100">
                           {t('settings.statusValues.configured')}
                         </span>
                       </>
                     ) : (
                       <>
                         <XCircle className="w-5 h-5 text-amber-500" />
-                        <span className="font-mono text-sm font-bold">
+                        <span className="font-sans text-sm font-bold text-slate-900 dark:text-slate-100">
                           {t('settings.statusValues.notSet')}
                         </span>
                       </>
@@ -1336,6 +1339,27 @@ export default function SettingsPage() {
             </section>
           )}
 
+          {/* Theme & Appearance Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+              <Sun className="w-4 h-4 text-primary" />
+              <h2 className="font-sans text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+                Appearance & Theme
+              </h2>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sw-xs">
+              <div>
+                <h3 className="font-sans text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Color Mode
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Choose between Light, Dark, or System mode to match your OS preference.
+                </p>
+              </div>
+              <ThemeToggle />
+            </div>
+          </section>
+
           {/* Language Settings Section */}
           <section className="space-y-6">
             <div className="flex items-center gap-2 border-b border-black/10 pb-2">
@@ -1401,25 +1425,25 @@ export default function SettingsPage() {
           {/* Danger Zone */}
           {isAdmin && (
             <section className="space-y-6">
-              <div className="flex items-center gap-2 border-b border-red-200 pb-2">
-                <AlertTriangle className="w-4 h-4 text-red-600" />
-                <h2 className="font-mono text-sm font-bold uppercase tracking-wider text-red-600">
+              <div className="flex items-center gap-2 border-b border-red-200/80 dark:border-red-900/50 pb-2">
+                <AlertTriangle className="w-4 h-4 text-red-600 dark:text-red-400" />
+                <h2 className="font-sans text-sm font-bold uppercase tracking-wider text-red-600 dark:text-red-400">
                   {t('settings.dangerZone')}
                 </h2>
               </div>
 
               <div className="grid md:grid-cols-2 gap-6">
                 {/* Clear API Keys */}
-                <div className="border border-red-200 bg-red-50/50 p-6 space-y-4">
+                <div className="border border-red-200/80 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 rounded-xl p-6 space-y-4">
                   <div>
-                    <h3 className="font-bold text-sm text-red-900 mb-1">
+                    <h3 className="font-sans font-semibold text-sm text-red-900 dark:text-red-200 mb-1">
                       {t('settings.clearApiKeys')}
                     </h3>
-                    <p className="text-xs text-red-700">{t('settings.clearApiKeysDescription')}</p>
+                    <p className="font-sans text-xs text-red-700 dark:text-red-300/80 leading-relaxed">{t('settings.clearApiKeysDescription')}</p>
                   </div>
                   <Button
                     variant="outline"
-                    className="w-full border-red-200 text-red-700 hover:bg-red-50 hover:text-red-800 hover:border-red-300"
+                    className="w-full border-red-200 dark:border-red-900/60 text-red-700 dark:text-red-300 hover:bg-red-100 dark:hover:bg-red-950/50 hover:text-red-900 dark:hover:text-red-200 hover:border-red-300 dark:hover:border-red-800 rounded-lg"
                     onClick={() => setShowClearApiKeysDialog(true)}
                     disabled={isResetting}
                   >
@@ -1429,16 +1453,16 @@ export default function SettingsPage() {
                 </div>
 
                 {/* Reset Database */}
-                <div className="border border-red-200 bg-red-50/50 p-6 space-y-4">
+                <div className="border border-red-200/80 dark:border-red-900/50 bg-red-50/40 dark:bg-red-950/20 rounded-xl p-6 space-y-4">
                   <div>
-                    <h3 className="font-bold text-sm text-red-900 mb-1">
+                    <h3 className="font-sans font-semibold text-sm text-red-900 dark:text-red-200 mb-1">
                       {t('settings.resetDatabase')}
                     </h3>
-                    <p className="text-xs text-red-700">{t('settings.resetDatabaseDescription')}</p>
+                    <p className="font-sans text-xs text-red-700 dark:text-red-300/80 leading-relaxed">{t('settings.resetDatabaseDescription')}</p>
                   </div>
                   <Button
                     variant="destructive"
-                    className="w-full"
+                    className="w-full rounded-lg"
                     onClick={() => setShowResetDatabaseDialog(true)}
                     disabled={isResetting}
                   >
@@ -1452,7 +1476,7 @@ export default function SettingsPage() {
         </div>
 
         {/* Footer */}
-        <div className="bg-secondary p-4 border-t border-black flex justify-between items-center">
+        <div className="bg-slate-50 dark:bg-slate-900/90 p-4 border-t border-slate-200/80 dark:border-slate-800 flex justify-between items-center">
           <div className="flex items-center gap-2">
             <Image
               src="/logo.svg"
@@ -1461,25 +1485,25 @@ export default function SettingsPage() {
               height={20}
               className="w-5 h-5"
             />
-            <span className="font-mono text-xs text-steel-grey">
+            <span className="font-sans text-xs text-slate-500 dark:text-slate-400 font-medium">
               {getVersionString().toUpperCase()}
             </span>
           </div>
           <div className="flex items-center gap-2">
             {statusLoading ? (
               <>
-                <Loader2 className="w-3 h-3 animate-spin text-steel-grey" />
-                <span className="font-mono text-xs text-steel-grey">
+                <Loader2 className="w-3 h-3 animate-spin text-slate-400" />
+                <span className="font-sans text-xs text-slate-500 dark:text-slate-400">
                   {t('settings.footer.status.checking')}
                 </span>
               </>
             ) : systemStatus ? (
               <>
                 <div
-                  className={`w-3 h-3 ${systemStatus.status === 'ready' ? 'bg-green-700' : 'bg-amber-500'}`}
+                  className={`w-2.5 h-2.5 rounded-full ${systemStatus.status === 'ready' ? 'bg-emerald-500' : 'bg-amber-500'}`}
                 ></div>
                 <span
-                  className={`font-mono text-xs font-bold ${systemStatus.status === 'ready' ? 'text-green-700' : 'text-amber-600'}`}
+                  className={`font-sans text-xs font-semibold ${systemStatus.status === 'ready' ? 'text-emerald-600 dark:text-emerald-400' : 'text-amber-600 dark:text-amber-400'}`}
                 >
                   {systemStatus.status === 'ready'
                     ? t('settings.footer.status.ready')
@@ -1487,7 +1511,7 @@ export default function SettingsPage() {
                 </span>
               </>
             ) : (
-              <span className="font-mono text-xs text-steel-grey">
+              <span className="font-sans text-xs text-slate-500 dark:text-slate-400">
                 {t('settings.footer.status.offline')}
               </span>
             )}

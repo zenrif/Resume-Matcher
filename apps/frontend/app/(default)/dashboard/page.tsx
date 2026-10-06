@@ -597,20 +597,20 @@ export default function DashboardPage() {
             <Link href="/settings" className="block h-full">
               <Card
                 variant="interactive"
-                className="min-h-[220px] h-full border-dashed border-amber-300 bg-amber-50/50 hover:bg-amber-50/80 hover:border-amber-400 p-6 flex flex-col justify-between"
+                className="min-h-[220px] h-full border-dashed border-amber-300 dark:border-amber-600/40 bg-amber-50/50 dark:bg-amber-950/20 hover:bg-amber-50/80 dark:hover:bg-amber-950/30 hover:border-amber-400 p-6 flex flex-col justify-between"
               >
                 <div>
-                  <div className="w-12 h-12 rounded-xl bg-amber-100 border border-amber-200 text-amber-700 flex items-center justify-center mb-4">
+                  <div className="w-12 h-12 rounded-xl bg-amber-100 dark:bg-amber-900/40 border border-amber-200 dark:border-amber-800/60 text-amber-700 dark:text-amber-400 flex items-center justify-center mb-4">
                     <AlertTriangle className="w-6 h-6" />
                   </div>
-                  <CardTitle className="text-base font-semibold text-amber-900 mb-2">
+                  <CardTitle className="text-base font-semibold text-amber-900 dark:text-amber-200 mb-2">
                     {t('dashboard.setupRequiredTitle')}
                   </CardTitle>
-                  <CardDescription className="text-amber-700 text-xs leading-relaxed">
+                  <CardDescription className="text-amber-700 dark:text-amber-300/80 text-xs leading-relaxed">
                     {t('dashboard.setupRequiredMessage')}
                   </CardDescription>
                 </div>
-                <div className="flex items-center gap-2 text-amber-800 font-medium text-xs pt-4">
+                <div className="flex items-center gap-2 text-amber-800 dark:text-amber-300 font-medium text-xs pt-4">
                   <Settings className="w-4 h-4" />
                   <span>{t('nav.goToSettings')} &rarr;</span>
                 </div>
@@ -846,7 +846,7 @@ export default function DashboardPage() {
             'min-h-[220px] h-full p-6 flex flex-col justify-between border-2 border-dashed transition-all',
             isTailorEnabled
               ? 'border-primary/40 hover:border-primary hover:bg-primary/[0.03] cursor-pointer group'
-              : 'border-slate-200/90 bg-slate-50/50 opacity-80 cursor-not-allowed'
+              : 'border-slate-200/90 dark:border-slate-800 bg-slate-50/50 dark:bg-slate-900/50 opacity-80 cursor-not-allowed'
           )}
           role={isTailorEnabled ? 'button' : undefined}
           tabIndex={isTailorEnabled ? 0 : -1}
@@ -869,7 +869,7 @@ export default function DashboardPage() {
                   'w-11 h-11 rounded-xl flex items-center justify-center mb-4 transition-colors',
                   isTailorEnabled
                     ? 'bg-primary text-white shadow-sm group-hover:bg-blue-600'
-                    : 'bg-slate-200 text-slate-400'
+                    : 'bg-slate-200 dark:bg-slate-800 text-slate-400 dark:text-slate-500'
                 )}
               >
                 <Plus className="w-5 h-5" />
@@ -878,13 +878,13 @@ export default function DashboardPage() {
                 className={cn(
                   'text-base font-semibold',
                   isTailorEnabled
-                    ? 'text-slate-900 group-hover:text-primary transition-colors'
-                    : 'text-slate-500'
+                    ? 'text-slate-900 dark:text-slate-100 group-hover:text-primary transition-colors'
+                    : 'text-slate-500 dark:text-slate-400'
                 )}
               >
                 {t('dashboard.createResume')}
               </CardTitle>
-              <CardDescription className="text-xs text-slate-500 mt-2 leading-relaxed">
+              <CardDescription className="text-xs text-slate-500 dark:text-slate-400 mt-2 leading-relaxed">
                 {isTailorEnabled
                   ? '// ' + t('dashboard.initializeSequence')
                   : '// ' + t('dashboard.setupRequiredMessage')}
@@ -895,7 +895,7 @@ export default function DashboardPage() {
                 + {t('dashboard.createResume')} &rarr;
               </p>
             ) : (
-              <span className="text-[11px] font-mono text-amber-700/80 pt-4 uppercase">
+              <span className="text-[11px] font-mono text-amber-700/80 dark:text-amber-400/80 pt-4 uppercase">
                 {masterResumeId ? '[API Key Required]' : '[Master Resume Required]'}
               </span>
             )}

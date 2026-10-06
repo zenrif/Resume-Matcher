@@ -147,7 +147,7 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
           aria-labelledby={titleId}
           className={cn(
             'relative w-full max-w-lg',
-            'rounded-2xl border border-slate-200/90 bg-white shadow-sw-xl overflow-hidden p-6 md:p-8',
+            'rounded-2xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sw-xl overflow-hidden p-6 md:p-8',
             'animate-in fade-in-0 zoom-in-95 duration-200',
             className
           )}
@@ -156,7 +156,7 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
           {children}
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
+            className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
             <X className="h-4 w-4" />
             <span className="sr-only">{t('common.close')}</span>
@@ -203,7 +203,7 @@ const DialogTitle: React.FC<DialogTitleProps> = ({ className, children, ...props
   return (
     <h2
       id={titleId}
-      className={cn('font-sans text-xl font-semibold leading-tight tracking-tight text-slate-900', className)}
+      className={cn('font-sans text-xl font-semibold leading-tight tracking-tight text-slate-900 dark:text-slate-100', className)}
       {...props}
     >
       {children}
@@ -217,7 +217,7 @@ interface DialogDescriptionProps {
 }
 
 const DialogDescription: React.FC<DialogDescriptionProps> = ({ className, children, ...props }) => (
-  <p className={cn('text-sm text-slate-500 font-sans leading-relaxed', className)} {...props}>
+  <p className={cn('text-sm text-slate-500 dark:text-slate-400 font-sans leading-relaxed', className)} {...props}>
     {children}
   </p>
 );

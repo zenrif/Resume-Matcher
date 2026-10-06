@@ -180,10 +180,10 @@ export function UsersAdminSection() {
   return (
     <section className="space-y-6">
       {/* Header */}
-      <div className="flex items-center justify-between border-b border-black/10 pb-2">
+      <div className="flex items-center justify-between border-b border-slate-200/80 dark:border-slate-800 pb-2">
         <div className="flex items-center gap-2">
-          <Users className="w-4 h-4" />
-          <h2 className="font-mono text-sm font-bold uppercase tracking-wider">
+          <Users className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+          <h2 className="font-sans text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
             {t('settings.users.title')}
           </h2>
         </div>
@@ -193,7 +193,7 @@ export function UsersAdminSection() {
             size="sm"
             onClick={loadUsers}
             disabled={loading}
-            className="gap-1 text-xs font-mono uppercase"
+            className="gap-1 text-xs font-sans uppercase font-semibold"
           >
             <RefreshCw className={`w-3 h-3 ${loading ? 'animate-spin' : ''}`} />
             {t('common.retry')}
@@ -201,7 +201,7 @@ export function UsersAdminSection() {
           <Button
             size="sm"
             onClick={() => setShowInviteForm(!showInviteForm)}
-            className="font-mono text-xs uppercase font-bold"
+            className="font-sans text-xs uppercase font-semibold rounded-lg"
           >
             <UserPlus className="w-3.5 h-3.5 mr-1.5" />
             {t('settings.users.inviteUser')}
@@ -211,14 +211,14 @@ export function UsersAdminSection() {
 
       {/* Invite User Panel */}
       {showInviteForm && (
-        <div className="border border-black bg-white p-6 shadow-sw-default space-y-4">
-          <div className="flex items-center justify-between border-b border-black/10 pb-2">
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-black">
+        <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sw-xs space-y-4">
+          <div className="flex items-center justify-between border-b border-slate-100 dark:border-slate-800 pb-2">
+            <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
               {t('settings.users.inviteUser')}
             </h3>
             <button
               onClick={() => setShowInviteForm(false)}
-              className="font-mono text-xs text-steel-grey uppercase hover:text-black"
+              className="font-sans text-xs text-slate-400 dark:text-slate-500 uppercase hover:text-slate-900 dark:hover:text-slate-100"
             >
               ✕ {t('common.close')}
             </button>
@@ -333,58 +333,58 @@ export function UsersAdminSection() {
       )}
 
       {/* Users Table */}
-      <div className="border border-black bg-white shadow-sw-sm overflow-hidden">
+      <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sw-xs overflow-hidden">
         {loading ? (
-          <div className="p-8 flex items-center justify-center font-mono text-xs text-steel-grey uppercase">
+          <div className="p-8 flex items-center justify-center font-sans text-xs text-slate-400 uppercase">
             <Loader2 className="w-5 h-5 mr-2 animate-spin" />
             {t('common.loading')}
           </div>
         ) : error ? (
           <div className="p-6 text-center space-y-3">
-            <p className="font-mono text-xs text-red-600 uppercase">{error}</p>
-            <Button variant="outline" size="sm" onClick={loadUsers} className="font-mono text-xs">
+            <p className="font-sans text-xs text-red-600 uppercase">{error}</p>
+            <Button variant="outline" size="sm" onClick={loadUsers} className="font-sans text-xs">
               {t('common.retry')}
             </Button>
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full border-collapse text-left font-mono text-xs">
+            <table className="w-full border-collapse text-left font-sans text-xs">
               <thead>
-                <tr className="border-b border-black bg-paper-tint text-black uppercase">
-                  <th className="p-3 font-bold">{t('settings.users.tableEmail')}</th>
-                  <th className="p-3 font-bold">{t('settings.users.tableName')}</th>
-                  <th className="p-3 font-bold">{t('settings.users.tableRole')}</th>
-                  <th className="p-3 font-bold">{t('settings.users.tableQuota')}</th>
-                  <th className="p-3 font-bold">{t('settings.users.tableStatus')}</th>
-                  <th className="p-3 font-bold text-right">{t('settings.users.tableActions')}</th>
+                <tr className="border-b border-slate-200/80 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/60 text-slate-700 dark:text-slate-300 uppercase font-semibold">
+                  <th className="p-3.5 font-semibold">{t('settings.users.tableEmail')}</th>
+                  <th className="p-3.5 font-semibold">{t('settings.users.tableName')}</th>
+                  <th className="p-3.5 font-semibold">{t('settings.users.tableRole')}</th>
+                  <th className="p-3.5 font-semibold">{t('settings.users.tableQuota')}</th>
+                  <th className="p-3.5 font-semibold">{t('settings.users.tableStatus')}</th>
+                  <th className="p-3.5 font-semibold text-right">{t('settings.users.tableActions')}</th>
                 </tr>
               </thead>
-              <tbody className="divide-y divide-black/10">
+              <tbody className="divide-y divide-slate-100 dark:divide-slate-800/60">
                 {users.map((u) => {
                   const isSelf = u.id === currentUser?.id;
                   return (
-                    <tr key={u.id} className="hover:bg-slate-50 transition-colors">
-                      <td className="p-3 font-medium text-black">
+                    <tr key={u.id} className="hover:bg-slate-50/80 dark:hover:bg-slate-800/40 transition-colors">
+                      <td className="p-3.5 font-medium text-slate-900 dark:text-slate-100">
                         {u.email}
                         {isSelf && (
-                          <span className="ml-2 px-1.5 py-0.5 border border-black bg-yellow-100 text-[10px] font-bold">
+                          <span className="ml-2 px-1.5 py-0.5 rounded border border-amber-300/80 dark:border-amber-700/60 bg-amber-50 dark:bg-amber-950/60 text-amber-800 dark:text-amber-300 text-[10px] font-bold">
                             YOU
                           </span>
                         )}
                       </td>
-                      <td className="p-3 text-steel-grey">{u.display_name}</td>
-                      <td className="p-3">
+                      <td className="p-3.5 text-slate-600 dark:text-slate-400">{u.display_name}</td>
+                      <td className="p-3.5">
                         <span
-                          className={`inline-block px-2 py-0.5 border border-black text-[10px] font-bold uppercase ${
+                          className={`inline-block px-2 py-0.5 rounded border text-[10px] font-bold uppercase ${
                             u.role === 'admin'
-                              ? 'bg-purple-100 text-purple-900'
-                              : 'bg-paper-tint text-ink-soft'
+                              ? 'border-purple-300/80 dark:border-purple-800/60 bg-purple-50 dark:bg-purple-950/60 text-purple-700 dark:text-purple-300'
+                              : 'border-slate-200 dark:border-slate-700 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400'
                           }`}
                         >
                           {u.role}
                         </span>
                       </td>
-                      <td className="p-3">
+                      <td className="p-3.5 text-slate-700 dark:text-slate-300">
                         <div className="flex items-center gap-2">
                           <span>
                             {u.daily_ai_limit !== null
@@ -398,33 +398,33 @@ export function UsersAdminSection() {
                                 u.daily_ai_limit !== null ? String(u.daily_ai_limit) : ''
                               );
                             }}
-                            className="text-steel-grey hover:text-black"
+                            className="text-slate-400 hover:text-slate-700 dark:hover:text-slate-200"
                             title={t('settings.users.editQuota')}
                           >
                             <Edit2 className="w-3 h-3" />
                           </button>
                         </div>
                       </td>
-                      <td className="p-3">
+                      <td className="p-3.5">
                         <span
-                          className={`inline-flex items-center gap-1 font-bold text-[10px] uppercase ${
-                            u.is_active ? 'text-green-700' : 'text-red-600'
+                          className={`inline-flex items-center gap-1.5 font-bold text-[10px] uppercase ${
+                            u.is_active ? 'text-emerald-600 dark:text-emerald-400' : 'text-slate-400 dark:text-slate-500'
                           }`}
                         >
                           <span
-                            className={`w-2 h-2 rounded-none ${
-                              u.is_active ? 'bg-green-600' : 'bg-red-500'
+                            className={`w-2 h-2 rounded-full ${
+                              u.is_active ? 'bg-emerald-500' : 'bg-slate-400'
                             }`}
                           />
                           {u.is_active ? t('settings.users.active') : t('settings.users.inactive')}
                         </span>
                       </td>
-                      <td className="p-3 text-right">
+                      <td className="p-3.5 text-right">
                         <div className="flex items-center justify-end gap-2">
                           {/* Reset Link */}
                           <button
                             onClick={() => handleGenerateResetLink(u)}
-                            className="px-2 py-1 border border-black bg-white hover:bg-black hover:text-white transition-all text-[10px] uppercase font-bold"
+                            className="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-[10px] uppercase font-semibold transition-all"
                             title={t('settings.users.resetLink')}
                           >
                             <Key className="w-3 h-3 inline mr-1" />
@@ -435,7 +435,7 @@ export function UsersAdminSection() {
                           {!isSelf && (
                             <button
                               onClick={() => handleToggleActive(u)}
-                              className="px-2 py-1 border border-black bg-white hover:bg-black hover:text-white transition-all text-[10px] uppercase font-bold"
+                              className="px-2.5 py-1 rounded-md border border-slate-200 dark:border-slate-700 bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-300 hover:bg-slate-100 dark:hover:bg-slate-700 text-[10px] uppercase font-semibold transition-all"
                               title={
                                 u.is_active
                                   ? t('settings.users.deactivate')
@@ -443,9 +443,9 @@ export function UsersAdminSection() {
                               }
                             >
                               {u.is_active ? (
-                                <UserX className="w-3 h-3 text-red-600 inline" />
+                                <UserX className="w-3 h-3 text-red-600 dark:text-red-400 inline" />
                               ) : (
-                                <UserCheck className="w-3 h-3 text-green-600 inline" />
+                                <UserCheck className="w-3 h-3 text-emerald-600 dark:text-emerald-400 inline" />
                               )}
                             </button>
                           )}
@@ -457,7 +457,7 @@ export function UsersAdminSection() {
                                 setUserToDelete(u);
                                 setDeleteError(null);
                               }}
-                              className="px-2 py-1 border border-red-500 text-red-600 hover:bg-red-600 hover:text-white transition-all text-[10px] uppercase font-bold"
+                              className="px-2.5 py-1 rounded-md border border-red-300 dark:border-red-900/60 bg-red-50/50 dark:bg-red-950/40 text-red-600 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-900/50 text-[10px] uppercase font-semibold transition-all"
                               title={t('settings.users.delete')}
                             >
                               <Trash2 className="w-3 h-3 inline" />

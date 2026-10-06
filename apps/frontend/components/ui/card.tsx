@@ -8,17 +8,17 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', noPadding = false, ...props }, ref) => {
-    const baseStyles = 'rounded-xl flex flex-col relative overflow-hidden bg-white';
+    const baseStyles = 'rounded-xl flex flex-col relative overflow-hidden bg-card text-card-foreground transition-colors duration-200';
 
     const variants = {
-      default: 'border border-slate-200/80 shadow-sw-xs',
+      default: 'border border-slate-200/80 dark:border-slate-800/80 shadow-sw-xs',
       interactive: cn(
-        'border border-slate-200/80 shadow-sw-xs',
+        'border border-slate-200/80 dark:border-slate-800/80 shadow-sw-xs',
         'transition-all duration-200 cubic-bezier(0.16, 1, 0.3, 1)',
         'cursor-pointer group',
-        'hover:border-slate-300 hover:shadow-sw-card hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]'
+        'hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sw-card hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]'
       ),
-      outline: 'border border-slate-200/90 shadow-none',
+      outline: 'border border-slate-200/90 dark:border-slate-800 shadow-none',
       ghost: 'border-none shadow-none bg-transparent',
     };
 
@@ -44,7 +44,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTML
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('font-sans text-xl font-semibold leading-tight tracking-tight text-slate-900', className)}
+      className={cn('font-sans text-xl font-semibold leading-tight tracking-tight text-slate-900 dark:text-slate-100', className)}
       {...props}
     />
   )
@@ -55,7 +55,7 @@ const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn('text-sm text-slate-500 font-sans leading-relaxed', className)} {...props} />
+  <p ref={ref} className={cn('text-sm text-slate-500 dark:text-slate-400 font-sans leading-relaxed', className)} {...props} />
 ));
 CardDescription.displayName = 'CardDescription';
 

@@ -40,17 +40,17 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
   return (
     <div
       className={cn(
-        'flex items-center justify-between p-4.5 rounded-xl border border-slate-200/80 bg-white',
+        'flex items-center justify-between p-4.5 rounded-xl border border-slate-200/80 dark:border-slate-800 bg-white dark:bg-slate-900',
         'shadow-sw-xs',
         disabled && 'opacity-50 cursor-not-allowed',
         className
       )}
     >
       <div className="flex-1 mr-4">
-        <div id={labelId} className="font-sans text-sm font-semibold text-slate-900">
+        <div id={labelId} className="font-sans text-sm font-semibold text-slate-900 dark:text-slate-100">
           {label}
         </div>
-        {description && <div className="font-sans text-xs text-slate-500 mt-1">{description}</div>}
+        {description && <div className="font-sans text-xs text-slate-500 dark:text-slate-400 mt-1">{description}</div>}
       </div>
       <button
         type="button"
@@ -64,7 +64,7 @@ export const ToggleSwitch: React.FC<ToggleSwitchProps> = ({
           'transition-colors duration-200 ease-in-out',
           'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
           'disabled:cursor-not-allowed',
-          checked ? 'bg-primary' : 'bg-slate-200'
+          checked ? 'bg-primary' : 'bg-slate-200 dark:bg-slate-700'
         )}
       >
         <span

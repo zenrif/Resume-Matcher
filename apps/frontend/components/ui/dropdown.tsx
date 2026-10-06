@@ -61,12 +61,12 @@ export function Dropdown({
   return (
     <div className={`space-y-1.5 ${className}`} ref={containerRef}>
       {label && (
-        <label className="font-sans text-xs font-semibold uppercase tracking-wider text-slate-600 block">
+        <label className="font-sans text-xs font-semibold uppercase tracking-wider text-slate-600 dark:text-slate-400 block">
           {label}
         </label>
       )}
 
-      {description && <p className="text-xs text-slate-500 font-sans">{description}</p>}
+      {description && <p className="text-xs text-slate-500 dark:text-slate-400 font-sans">{description}</p>}
 
       <div className="relative">
         <button
@@ -78,24 +78,24 @@ export function Dropdown({
           aria-expanded={isOpen}
           aria-controls={isOpen ? menuId : undefined}
           aria-label={label}
-          className="w-full flex items-center justify-between rounded-lg border border-slate-200/90 bg-white px-3.5 py-2.5 font-sans text-sm text-slate-900 transition-all duration-150 shadow-sw-xs hover:border-slate-300 hover:shadow-sw-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
+          className="w-full flex items-center justify-between rounded-lg border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 px-3.5 py-2.5 font-sans text-sm text-slate-900 dark:text-slate-100 transition-all duration-150 shadow-sw-xs hover:border-slate-300 dark:hover:border-slate-700 hover:shadow-sw-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="flex-1 text-left min-w-0">
             {selectedOption ? (
               <div>
-                <div className="font-medium text-slate-900 truncate">{selectedOption.label}</div>
+                <div className="font-medium text-slate-900 dark:text-slate-100 truncate">{selectedOption.label}</div>
                 {selectedOption.description && (
-                  <div className="text-xs text-slate-500 mt-0.5 font-normal truncate">
+                  <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 font-normal truncate">
                     {selectedOption.description}
                   </div>
                 )}
               </div>
             ) : (
-              <span className="text-slate-400">{t('common.selectOption')}</span>
+              <span className="text-slate-400 dark:text-slate-500">{t('common.selectOption')}</span>
             )}
           </div>
           <ChevronDown
-            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${
+            className={`w-4 h-4 text-slate-400 dark:text-slate-500 transition-transform duration-200 ml-2 shrink-0 ${
               isOpen ? 'rotate-180 text-primary' : ''
             }`}
           />
@@ -106,7 +106,7 @@ export function Dropdown({
             id={menuId}
             role="menu"
             aria-label={label}
-            className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-xl border border-slate-200/90 bg-white shadow-sw-lg overflow-hidden p-1.5 animate-in fade-in-0 zoom-in-95 duration-150"
+            className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sw-lg overflow-hidden p-1.5 animate-in fade-in-0 zoom-in-95 duration-150"
           >
             <div className="max-h-64 overflow-y-auto space-y-0.5">
               {options.map((option) => (
@@ -117,15 +117,15 @@ export function Dropdown({
                   onClick={() => handleSelect(option.id)}
                   className={`w-full px-3 py-2 text-left font-sans text-sm rounded-lg transition-colors duration-150 ${
                     option.id === value
-                      ? 'bg-blue-50 text-primary font-medium'
-                      : 'text-slate-700 hover:bg-slate-50'
+                      ? 'bg-blue-50 dark:bg-blue-950/40 text-primary font-medium'
+                      : 'text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800'
                   }`}
                 >
                   <div className="flex items-center justify-between gap-2">
                     <div className="flex-1 min-w-0">
                       <div className="truncate">{option.label}</div>
                       {option.description && (
-                        <div className="text-xs text-slate-500 mt-0.5 truncate">{option.description}</div>
+                        <div className="text-xs text-slate-500 dark:text-slate-400 mt-0.5 truncate">{option.description}</div>
                       )}
                     </div>
                     {option.id === value && (
