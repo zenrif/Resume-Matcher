@@ -31,12 +31,10 @@ export const SwissGrid = ({ children }: { children: React.ReactNode }) => {
           </div>
         </div>
 
-        {/* Content Grid - Scrollable area with clean slate separators */}
-        <div className="@container flex-1 overflow-y-auto overflow-x-hidden relative z-10">
-          <div className="p-0">
-            <div className="grid grid-cols-1 @2xl:grid-cols-2 @3xl:grid-cols-3 @5xl:grid-cols-5 bg-slate-100/90 gap-[1px] border-b border-slate-100">
-              {children}
-            </div>
+        {/* Content Area - Scrollable area with generous padding and clean modern responsive grid */}
+        <div className="@container flex-1 overflow-y-auto overflow-x-hidden relative z-10 p-5 sm:p-6 md:p-8 bg-slate-50/40">
+          <div className="grid grid-cols-1 @xl:grid-cols-2 @3xl:grid-cols-3 @6xl:grid-cols-4 gap-5 md:gap-6">
+            {children}
           </div>
         </div>
 
