@@ -386,18 +386,18 @@ export function AccountSection() {
       </div>
 
       {/* Delete All My Data (Per-User) */}
-      <div className="border border-red-200 bg-red-50/40 p-6 space-y-4">
+      <div className="border border-red-200 dark:border-red-900/60 bg-red-50/40 dark:bg-red-950/20 rounded-xl p-6 space-y-4">
         <div>
-          <h3 className="font-mono text-sm font-bold uppercase tracking-wider text-red-900 mb-1">
+          <h3 className="font-sans text-sm font-bold uppercase tracking-wider text-red-900 dark:text-red-300 mb-1">
             {t('settings.account.deleteDataTitle')}
           </h3>
-          <p className="font-mono text-xs text-red-700">
+          <p className="font-sans text-xs text-red-700 dark:text-red-400">
             {t('settings.account.deleteDataDescription')}
           </p>
         </div>
 
         {deleteSuccess && (
-          <div className="border border-green-500 bg-green-50 p-3 flex items-center gap-2 text-xs font-mono text-green-700">
+          <div className="border border-green-500 bg-green-50 dark:bg-green-950/40 p-3 rounded-lg flex items-center gap-2 text-xs font-sans text-green-700 dark:text-green-300">
             <CheckCircle2 className="w-4 h-4 shrink-0" />
             <span>{t('settings.account.deleteDataSuccess')}</span>
           </div>
@@ -405,7 +405,7 @@ export function AccountSection() {
 
         <Button
           variant="outline"
-          className="border-red-300 text-red-700 hover:bg-red-100 hover:text-red-900 font-mono text-xs uppercase font-bold"
+          className="border-red-300 dark:border-red-800 text-red-700 dark:text-red-400 hover:bg-red-100 dark:hover:bg-red-950/50 hover:text-red-900 dark:hover:text-red-300 font-sans text-xs uppercase font-semibold rounded-lg"
           onClick={() => {
             setDeleteError(null);
             setDeleteConfirmationText('');

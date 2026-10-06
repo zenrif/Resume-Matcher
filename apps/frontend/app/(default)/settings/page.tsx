@@ -84,10 +84,13 @@ const PROVIDERS: LLMProvider[] = [
   'ollama',
 ];
 
+import { ThemeToggle } from '@/components/common/theme-toggle';
+import Sun from 'lucide-react/dist/esm/icons/sun';
+
 const SEGMENTED_BUTTON_BASE =
-  'border border-black font-mono transition-all duration-150 ease-out shadow-sw-sm hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none disabled:cursor-not-allowed disabled:opacity-50';
-const SEGMENTED_BUTTON_ACTIVE = 'bg-blue-700 text-white border-black hover:bg-blue-800';
-const SEGMENTED_BUTTON_INACTIVE = 'bg-white text-black hover:bg-secondary';
+  'border border-slate-200 dark:border-slate-700 font-sans font-medium rounded-lg transition-all duration-150 ease-out shadow-sw-xs hover:border-slate-300 dark:hover:border-slate-600 disabled:cursor-not-allowed disabled:opacity-50';
+const SEGMENTED_BUTTON_ACTIVE = 'bg-primary text-white border-primary hover:bg-blue-600 shadow-sw-sm';
+const SEGMENTED_BUTTON_INACTIVE = 'bg-white dark:bg-slate-900 text-slate-700 dark:text-slate-300 hover:bg-slate-50 dark:hover:bg-slate-800';
 
 const unwrapCodeBlock = (value?: string | null): string | null => {
   if (!value) return null;
@@ -712,14 +715,14 @@ export default function SettingsPage() {
         <div className="p-8 space-y-10">
           {/* API Key Not Configured Warning */}
           {isAdmin && !statusLoading && systemStatus && !systemStatus.llm_configured && (
-            <div className="border-2 border-amber-500 bg-amber-50 p-4 shadow-sw-default">
+            <div className="border border-amber-500/40 bg-amber-500/10 dark:bg-amber-500/5 p-4 rounded-xl shadow-sw-xs">
               <div className="flex items-start gap-3">
-                <div className="w-3 h-3 bg-amber-500 mt-1 shrink-0"></div>
+                <div className="w-2.5 h-2.5 rounded-full bg-amber-500 mt-1 shrink-0"></div>
                 <div className="flex-1">
-                  <p className="font-mono text-sm font-bold uppercase tracking-wider text-amber-800">
+                  <p className="font-sans text-xs font-bold uppercase tracking-wider text-amber-800 dark:text-amber-300">
                     {t('settings.setupRequired.title')}
                   </p>
-                  <p className="font-mono text-xs text-amber-700 mt-1">
+                  <p className="font-sans text-xs text-amber-700 dark:text-amber-400/90 mt-0.5 leading-relaxed">
                     {t('settings.setupRequired.description')}
                   </p>
                 </div>
@@ -1335,6 +1338,27 @@ export default function SettingsPage() {
               </div>
             </section>
           )}
+
+          {/* Theme & Appearance Section */}
+          <section className="space-y-4">
+            <div className="flex items-center gap-2 border-b border-slate-200 dark:border-slate-800 pb-2">
+              <Sun className="w-4 h-4 text-primary" />
+              <h2 className="font-sans text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
+                Appearance & Theme
+              </h2>
+            </div>
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3 p-4 rounded-xl border border-slate-200 dark:border-slate-800 bg-white dark:bg-slate-900 shadow-sw-xs">
+              <div>
+                <h3 className="font-sans text-sm font-semibold text-slate-900 dark:text-slate-100">
+                  Color Mode
+                </h3>
+                <p className="text-xs text-slate-500 dark:text-slate-400 mt-0.5">
+                  Choose between Light, Dark, or System mode to match your OS preference.
+                </p>
+              </div>
+              <ThemeToggle />
+            </div>
+          </section>
 
           {/* Language Settings Section */}
           <section className="space-y-6">

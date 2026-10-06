@@ -1,6 +1,8 @@
 @import 'tailwindcss';
 @import 'tw-animate-css';
 
+@variant dark (&:where(.dark, .dark *));
+
 @source "../../../{app,components,hooks,lib,messages}/**/*.{js,ts,jsx,tsx,mdx}";
 
 @theme inline {
@@ -129,6 +131,67 @@
   --sidebar-ring: #2563eb;
 }
 
+.dark {
+  /* Modern-Minimalist Studio Dark Palette */
+  --background: #090d16; /* Deep midnight slate canvas */
+  --foreground: #f8fafc; /* Crisp slate-50 text */
+
+  --card: #0f172a; /* Elevated slate-900 surface */
+  --card-foreground: #f8fafc;
+
+  --popover: #0f172a;
+  --popover-foreground: #f8fafc;
+
+  --primary: #3b82f6; /* Electric blue with high contrast on dark */
+  --primary-foreground: #ffffff;
+
+  --secondary: #1e293b; /* Slate-800 */
+  --secondary-foreground: #f8fafc;
+
+  --muted: #1e293b;
+  --muted-foreground: #94a3b8; /* Slate-400 */
+
+  --accent: #1e293b;
+  --accent-foreground: #f8fafc;
+
+  --destructive: #ef4444;
+  --destructive-foreground: #ffffff;
+
+  --border: rgba(148, 163, 184, 0.16); /* Luminous subtle slate border */
+  --input: #1e293b;
+  --ring: #3b82f6;
+
+  --chart-1: #3b82f6;
+  --chart-2: #22c55e;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #94a3b8;
+
+  --sidebar: #090d16;
+  --sidebar-foreground: #f8fafc;
+  --sidebar-primary: #3b82f6;
+  --sidebar-primary-foreground: #ffffff;
+  --sidebar-accent: #1e293b;
+  --sidebar-accent-foreground: #f8fafc;
+  --sidebar-border: rgba(148, 163, 184, 0.16);
+  --sidebar-ring: #3b82f6;
+
+  /* Brand Tokens in Dark */
+  --color-canvas: #090d16;
+  --color-ink: #f8fafc;
+  --color-paper-tint: #1e293b;
+  --color-steel-grey: #94a3b8;
+  --color-ink-soft: #cbd5e1;
+
+  /* Diffusion Shadows in Dark */
+  --shadow-sw-xs: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
+  --shadow-sw-sm: 0 1px 3px 0 rgba(0, 0, 0, 0.5), 0 1px 2px -1px rgba(0, 0, 0, 0.4);
+  --shadow-sw-default: 0 4px 14px -2px rgba(0, 0, 0, 0.5), 0 2px 6px -1px rgba(0, 0, 0, 0.3);
+  --shadow-sw-card: 0 10px 25px -4px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+  --shadow-sw-lg: 0 20px 35px -8px rgba(0, 0, 0, 0.7);
+  --shadow-sw-xl: 0 25px 50px -12px rgba(0, 0, 0, 0.85);
+}
+
 /* Modern-Minimalist Base & Upstream CSS Bridge */
 @layer base {
   * {
@@ -147,7 +210,7 @@
 }
 
 /* =========================================================================
-   INTELLIGENT CSS BRIDGE (UPSTREAM COMPATIBILITY)
+   INTELLIGENT CSS BRIDGE (UPSTREAM COMPATIBILITY & DARK MODE ADAPTATION)
    Remaps legacy brutalist utility classes (e.g. .border-black) to
    refined slate borders and soft surfaces in web UI, while completely
    preserving resume templates (.resume-body) and print outputs.
@@ -161,10 +224,67 @@
   border-width: 1px;
 }
 
+/* Dark Mode Bridge: Automatically adapts upstream pages with hardcoded colors */
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .bg-white) {
+  background-color: var(--card);
+}
+
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .bg-slate-50) {
+  background-color: rgba(30, 41, 59, 0.4);
+}
+
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .bg-slate-100),
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .bg-paper-tint) {
+  background-color: #1e293b;
+}
+
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .text-black),
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .text-slate-900) {
+  color: var(--foreground);
+}
+
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .text-slate-800),
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .text-slate-700),
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .text-slate-600) {
+  color: #cbd5e1;
+}
+
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .text-slate-500) {
+  color: #94a3b8;
+}
+
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .border-slate-200),
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .border-slate-100),
+.dark :where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .border-black) {
+  border-color: var(--border);
+}
+
 /* Ambient Dot Pattern background for modern dashboards */
 .modern-grid-pattern {
   background-image: radial-gradient(circle, rgba(148, 163, 184, 0.2) 1px, transparent 1px);
   background-size: 24px 24px;
+}
+
+.dark .modern-grid-pattern {
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.12) 1px, transparent 1px);
+}
+
+/* =========================================================================
+   SHEET-ON-CANVAS: ABSOLUTE ISOLATION FOR RESUME & COVER LETTER
+   A4 paper documents must always remain physical crisp white with black ink,
+   even in Dark Mode, ensuring 100% PDF export and ATS standard fidelity.
+   ========================================================================= */
+.dark .resume-body,
+.dark .resume-print,
+.dark .cover-letter-print,
+.dark [data-resume-sheet] {
+  background-color: #ffffff !important;
+  color: #000000 !important;
+  box-shadow: 0 20px 40px -10px rgba(0, 0, 0, 0.7), 0 0 0 1px rgba(255, 255, 255, 0.1) !important;
+}
+
+.dark .resume-body * {
+  color: inherit;
 }
 
 @media print {

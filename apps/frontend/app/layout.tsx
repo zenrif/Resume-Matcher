@@ -57,13 +57,22 @@ export const metadata: Metadata = {
   },
 };
 
+import { ThemeProvider } from '@/lib/context/theme-context';
+
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang="en-US" className="h-full" suppressHydrationWarning>
+      <head>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(function(){try{var t=localStorage.getItem('rm_theme');var d=window.matchMedia('(prefers-color-scheme: dark)').matches;if(t==='dark'||((!t||t==='system')&&d)){document.documentElement.classList.add('dark');document.documentElement.style.colorScheme='dark';}else{document.documentElement.classList.remove('dark');document.documentElement.style.colorScheme='light';}}catch(e){}})();`,
+          }}
+        />
+      </head>
       <body
-        className={`${plusJakartaSans.variable} ${notoSansSC.variable} ${notoSansKR.variable} ${notoSansJP.variable} font-sans antialiased bg-background text-ink-soft min-h-full`}
+        className={`${plusJakartaSans.variable} ${notoSansSC.variable} ${notoSansKR.variable} ${notoSansJP.variable} font-sans antialiased bg-background text-foreground min-h-full transition-colors duration-200`}
       >
-        {children}
+        <ThemeProvider>{children}</ThemeProvider>
       </body>
     </html>
   );
