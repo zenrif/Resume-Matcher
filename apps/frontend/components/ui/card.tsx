@@ -8,24 +8,19 @@ interface CardProps extends React.HTMLAttributes<HTMLDivElement> {
 
 const Card = React.forwardRef<HTMLDivElement, CardProps>(
   ({ className, variant = 'default', noPadding = false, ...props }, ref) => {
-    const baseStyles = 'rounded-none flex flex-col relative overflow-hidden';
+    const baseStyles = 'rounded-xl flex flex-col relative overflow-hidden bg-white';
 
     const variants = {
-      default: 'bg-canvas',
+      default: 'border border-slate-200/80 shadow-sw-xs',
       interactive: cn(
-        'bg-canvas border-2 border-transparent', // Initial state
-        'transition-all duration-200 ease-in-out',
+        'border border-slate-200/80 shadow-sw-xs',
+        'transition-all duration-200 cubic-bezier(0.16, 1, 0.3, 1)',
         'cursor-pointer group',
-        'hover:z-20 hover:border-ink hover:shadow-sw-default hover:-translate-y-[2px] hover:-translate-x-[2px]'
+        'hover:border-slate-300 hover:shadow-sw-card hover:-translate-y-0.5 active:translate-y-0 active:scale-[0.99]'
       ),
-      outline: 'bg-canvas border-2 border-ink',
-      ghost: 'bg-transparent border-none shadow-none',
+      outline: 'border border-slate-200/90 shadow-none',
+      ghost: 'border-none shadow-none bg-transparent',
     };
-
-    // Dashboard specific style that was common:
-    // border-2 border-dashed border-amber-500 bg-amber-50
-    // We can handle specific overrides via className, but the base interactive card
-    // in dashboard had: bg-background (canvas)
 
     return (
       <div
@@ -49,7 +44,7 @@ const CardTitle = React.forwardRef<HTMLHeadingElement, React.HTMLAttributes<HTML
   ({ className, ...props }, ref) => (
     <h3
       ref={ref}
-      className={cn('font-serif text-2xl font-semibold leading-none tracking-tight', className)}
+      className={cn('font-sans text-xl font-semibold leading-tight tracking-tight text-slate-900', className)}
       {...props}
     />
   )
@@ -60,7 +55,7 @@ const CardDescription = React.forwardRef<
   HTMLParagraphElement,
   React.HTMLAttributes<HTMLParagraphElement>
 >(({ className, ...props }, ref) => (
-  <p ref={ref} className={cn('text-sm text-steel-grey font-mono', className)} {...props} />
+  <p ref={ref} className={cn('text-sm text-slate-500 font-sans leading-relaxed', className)} {...props} />
 ));
 CardDescription.displayName = 'CardDescription';
 

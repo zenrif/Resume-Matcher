@@ -661,8 +661,8 @@ export default function DashboardPage() {
           >
             <div className="flex-1 flex flex-col h-full">
               <div className="flex justify-between items-start mb-6">
-                <div className="w-16 h-16 border-2 border-black bg-blue-700 text-white flex items-center justify-center">
-                  <span className="font-mono font-bold text-lg">M</span>
+                <div className="w-14 h-14 rounded-2xl bg-primary text-white flex items-center justify-center shadow-sw-xs">
+                  <span className="font-sans font-bold text-lg">M</span>
                 </div>
                 <div className="flex gap-1">
                   {(processingStatus === 'failed' || processingStatus === 'processing') && (
@@ -670,7 +670,7 @@ export default function DashboardPage() {
                       <Button
                         variant="ghost"
                         size="icon"
-                        className="h-8 w-8 hover:bg-blue-100 hover:text-blue-700 z-10 rounded-none relative"
+                        className="h-8 w-8 hover:bg-blue-100 hover:text-blue-700 z-10 rounded-lg relative"
                         onClick={handleRetryProcessing}
                         disabled={isRetrying}
                         aria-label={t('dashboard.retryProcessing')}
@@ -691,7 +691,7 @@ export default function DashboardPage() {
                 <CardTitle className="min-w-0 text-lg line-clamp-2 group-hover:text-primary">
                   {defaultMasterTitle || t('dashboard.masterResume')}
                 </CardTitle>
-                <span className="shrink-0 font-mono text-xs uppercase border border-black px-1 rounded-none">
+                <span className="shrink-0 font-sans text-[11px] font-semibold text-primary bg-primary/10 px-2 py-0.5 rounded-full">
                   {t('dashboard.defaultBadge')}
                 </span>
               </div>
@@ -708,7 +708,7 @@ export default function DashboardPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 rounded-none border-black"
+                      className="text-xs h-7"
                       onClick={handleRetryProcessing}
                       disabled={isRetrying}
                     >
@@ -719,7 +719,7 @@ export default function DashboardPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 rounded-none border-red-600 text-red-600 hover:bg-red-50"
+                      className="text-xs h-7 border-red-200 text-red-600 hover:bg-red-50"
                       onClick={handleDeleteAndReupload}
                     >
                       {t('dashboard.deleteAndReupload')}
@@ -738,20 +738,20 @@ export default function DashboardPage() {
             <Card
               key={resume.resume_id}
               variant="interactive"
-              className="aspect-square h-full bg-canvas"
+              className="aspect-square h-full"
               onClick={() => router.push(`/resumes/${resume.resume_id}`)}
             >
               <div className="flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-6">
-                  <div className="w-12 h-12 border-2 border-black bg-blue-700 text-white flex items-center justify-center">
-                    <span className="font-mono font-bold">M</span>
+                  <div className="w-12 h-12 rounded-xl bg-primary text-white flex items-center justify-center shadow-sw-xs">
+                    <span className="font-sans font-bold">M</span>
                   </div>
                   <span className="font-mono text-xs text-steel-grey uppercase">
                     {resume.processing_status}
                   </span>
                 </div>
                 <CardTitle className="text-lg">
-                  <span className="block font-serif text-base font-bold leading-tight mb-1 w-full line-clamp-2">
+                  <span className="block font-sans text-base font-semibold leading-tight mb-1 w-full line-clamp-2">
                     {title}
                   </span>
                 </CardTitle>
@@ -759,7 +759,7 @@ export default function DashboardPage() {
                   <Button
                     variant="outline"
                     size="sm"
-                    className="text-xs h-7 rounded-none border-black"
+                    className="text-xs h-7"
                     aria-label={t('dashboard.setDefault')}
                     onClick={(e) => handleSetDefault(e, resume.resume_id)}
                   >
@@ -769,7 +769,7 @@ export default function DashboardPage() {
                     <Button
                       variant="outline"
                       size="sm"
-                      className="text-xs h-7 rounded-none border-black"
+                      className="text-xs h-7"
                       aria-label={t('dashboard.duplicate')}
                       disabled={isDuplicating || resume.processing_status !== 'ready'}
                       onClick={(e) => handleDuplicate(e, resume.resume_id)}
@@ -787,7 +787,7 @@ export default function DashboardPage() {
         {showAddTrackTile && (
           <Card
             variant="interactive"
-            className="aspect-square h-full hover:bg-primary hover:text-canvas"
+            className="aspect-square h-full hover:border-primary/50 hover:bg-blue-50/20"
             role="button"
             tabIndex={0}
             aria-label={t('dashboard.addMasterTrack')}
@@ -795,8 +795,8 @@ export default function DashboardPage() {
             onKeyDown={handleInitializeMasterKeyDown}
           >
             <div className="flex-1 flex flex-col justify-between pointer-events-none">
-              <CardTitle className="text-lg uppercase">+ {t('dashboard.addMasterTrack')}</CardTitle>
-              <CardDescription className="font-mono uppercase opacity-60 group-hover:opacity-100 text-current">
+              <CardTitle className="text-lg">+ {t('dashboard.addMasterTrack')}</CardTitle>
+              <CardDescription className="opacity-75">
                 {t('dashboard.masterLimitReached', { max: MAX_MASTER_RESUMES })}
               </CardDescription>
             </div>
@@ -812,27 +812,27 @@ export default function DashboardPage() {
             <Card
               key={resume.resume_id}
               variant="interactive"
-              className="aspect-square h-full bg-canvas"
+              className="aspect-square h-full"
               onClick={() => router.push(`/resumes/${resume.resume_id}`)}
             >
               <div className="flex-1 flex flex-col">
                 <div className="flex justify-between items-start mb-6">
                   <div
-                    className="w-12 h-12 border-2 border-black flex items-center justify-center"
+                    className="w-12 h-12 rounded-xl flex items-center justify-center shadow-sw-xs border border-slate-200/60"
                     style={{ backgroundColor: color.bg, color: color.fg }}
                   >
-                    <span className="font-mono font-bold">{getMonogram(title)}</span>
+                    <span className="font-sans font-bold">{getMonogram(title)}</span>
                   </div>
                   <span className="font-mono text-xs text-steel-grey uppercase">
                     {resume.processing_status}
                   </span>
                 </div>
                 <CardTitle className="text-lg">
-                  <span className="block font-serif text-base font-bold leading-tight mb-1 w-full line-clamp-2">
+                  <span className="block font-sans text-base font-semibold leading-tight mb-1 w-full line-clamp-2">
                     {title}
                   </span>
                 </CardTitle>
-                <CardDescription className="mt-auto pt-4 uppercase">
+                <CardDescription className="mt-auto pt-4">
                   {t('dashboard.edited', {
                     date: formatDate(resume.updated_at || resume.created_at),
                   })}{' '}
@@ -848,11 +848,11 @@ export default function DashboardPage() {
             <Button
               onClick={() => router.push('/tailor')}
               disabled={!isTailorEnabled}
-              className="w-20 h-20 bg-blue-700 text-white border-2 border-black shadow-sw-default hover:bg-blue-800 hover:translate-y-[2px] hover:translate-x-[2px] hover:shadow-none transition-all rounded-none"
+              className="w-16 h-16 rounded-2xl bg-primary text-white shadow-sw-sm hover:bg-blue-600 hover:-translate-y-0.5 hover:shadow-sw-card active:scale-[0.98] transition-all"
             >
-              <Plus className="w-8 h-8" />
+              <Plus className="w-7 h-7" />
             </Button>
-            <p className="text-xs font-mono mt-4 uppercase text-green-700">
+            <p className="text-xs font-sans font-medium mt-3 text-emerald-600">
               {t('dashboard.createResume')}
             </p>
           </div>

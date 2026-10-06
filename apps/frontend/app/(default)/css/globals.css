@@ -4,8 +4,15 @@
 @source "../../../{app,components,hooks,lib,messages}/**/*.{js,ts,jsx,tsx,mdx}";
 
 @theme inline {
-  /* No --radius-* tokens — Swiss style commits to rounded-none everywhere.
-     Dead tokens removed. */
+  /* Modern-Minimalist Border Radius Hierarchy */
+  --radius-xs: 0.25rem;
+  --radius-sm: 0.375rem;
+  --radius-md: 0.5rem;
+  --radius-lg: 0.75rem;
+  --radius-xl: 1rem;
+  --radius-2xl: 1.25rem;
+  --radius-3xl: 1.5rem;
+
   --color-background: var(--background);
   --color-foreground: var(--foreground);
   --color-card: var(--card);
@@ -38,31 +45,26 @@
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-ring: var(--sidebar-ring);
 
-  /* Swiss Style brand tokens. --color-primary, --color-destructive,
-     --color-secondary, --color-background already exist above via the
-     legacy var(--xxx) chain — these are only the additional brand
-     semantics that didn't exist as @theme tokens before. */
-  --color-canvas: #f0f0e8;
-  --color-ink: #000000;
-  --color-success: #15803d;
-  --color-warning: #f97316;
+  /* Modern-Minimalist Brand Tokens */
+  --color-canvas: #f8fafc;
+  --color-ink: #0f172a;
+  --color-success: #16a34a;
+  --color-warning: #f59e0b;
 
-  /* Brand-tinted neutrals (OKLCH, chroma tinted ~0.005-0.018 toward
-     Hyper Blue hue 264) — replace ad-hoc Tailwind grays. */
-  --color-paper-tint: oklch(96% 0.005 264); /* replaces gray-50/100/200 */
-  --color-steel-grey: oklch(64% 0.012 264); /* replaces gray-300/400/500 */
-  --color-ink-soft: oklch(38% 0.018 264); /* replaces gray-600/700/800/900 */
+  /* Modern Refined Neutrals (Slate/Zinc palette) */
+  --color-paper-tint: #f1f5f9;
+  --color-steel-grey: #64748b;
+  --color-ink-soft: #475569;
 
-  /* Hard offset shadows in solid ink — Swiss style commits to no blur.
-     Sized small (1px) through xl (12px) for Hero/featured surfaces. */
-  --shadow-sw-xs: 1px 1px 0px 0px #000000;
-  --shadow-sw-sm: 2px 2px 0px 0px #000000;
-  --shadow-sw-default: 4px 4px 0px 0px #000000;
-  --shadow-sw-card: 6px 6px 0px 0px #000000;
-  --shadow-sw-lg: 8px 8px 0px 0px #000000;
-  --shadow-sw-xl: 12px 12px 0px 0px #000000;
+  /* Multi-tier Diffusion Shadows (Ambient Depth & Clean Elevation) */
+  --shadow-sw-xs: 0 1px 2px 0 rgba(15, 23, 42, 0.05);
+  --shadow-sw-sm: 0 1px 3px 0 rgba(15, 23, 42, 0.07), 0 1px 2px -1px rgba(15, 23, 42, 0.06);
+  --shadow-sw-default: 0 4px 14px -2px rgba(15, 23, 42, 0.07), 0 2px 6px -1px rgba(15, 23, 42, 0.04);
+  --shadow-sw-card: 0 10px 25px -4px rgba(15, 23, 42, 0.06), 0 4px 10px -2px rgba(15, 23, 42, 0.03);
+  --shadow-sw-lg: 0 20px 35px -8px rgba(15, 23, 42, 0.08), 0 8px 16px -4px rgba(15, 23, 42, 0.04);
+  --shadow-sw-xl: 0 25px 50px -12px rgba(15, 23, 42, 0.14);
 
-  /* Fonts: 100% Plus Jakarta Sans across the entire web application UI */
+  /* Fonts: Plus Jakarta Sans across the application UI */
   --font-sans: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
   --font-serif: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
   --font-mono: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
@@ -82,61 +84,58 @@
   --font-serif: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
   --font-mono: var(--font-plus-jakarta-sans), 'Plus Jakarta Sans', sans-serif;
 
-  /* Swiss International Style Palette */
-  --background: #f0f0e8; /* Canvas */
-  --foreground: #000000; /* Ink */
+  /* Modern-Minimalist Studio Palette */
+  --background: #f8fafc; /* Crisp, clean canvas */
+  --foreground: #0f172a; /* Off-black slate-900 */
 
-  --card: #f0f0e8;
-  --card-foreground: #000000;
+  --card: #ffffff; /* Floating pure white card */
+  --card-foreground: #0f172a;
 
-  --popover: #f0f0e8;
-  --popover-foreground: #000000;
+  --popover: #ffffff;
+  --popover-foreground: #0f172a;
 
-  --primary: #1d4ed8; /* Hyper Blue */
+  --primary: #2563eb; /* High-contrast modern royal/electric blue */
   --primary-foreground: #ffffff;
 
-  --secondary: #e5e5e0; /* Panel Grey */
-  --secondary-foreground: #000000;
+  --secondary: #f1f5f9; /* Slate-100 */
+  --secondary-foreground: #0f172a;
 
-  --muted: #e5e5e0;
-  --muted-foreground: #6b7280;
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
 
-  --accent: #e5e5e0;
-  --accent-foreground: #000000;
+  --accent: #f1f5f9;
+  --accent-foreground: #0f172a;
 
-  --destructive: #dc2626; /* Alert Red */
+  --destructive: #ef4444; /* Clean Red */
   --destructive-foreground: #ffffff;
 
-  --border: #000000;
-  --input: #f0f0e8;
-  --ring: #1d4ed8;
+  --border: #e2e8f0; /* Subtle slate-200 border */
+  --input: #ffffff;
+  --ring: #2563eb;
 
-  --chart-1: #1d4ed8;
-  --chart-2: #15803d;
-  --chart-3: #f97316;
-  --chart-4: #dc2626;
-  --chart-5: #000000;
+  --chart-1: #2563eb;
+  --chart-2: #16a34a;
+  --chart-3: #f59e0b;
+  --chart-4: #ef4444;
+  --chart-5: #0f172a;
 
-  --sidebar: #e5e5e0;
-  --sidebar-foreground: #000000;
-  --sidebar-primary: #1d4ed8;
+  --sidebar: #f8fafc;
+  --sidebar-foreground: #0f172a;
+  --sidebar-primary: #2563eb;
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: #d8d8d2;
-  --sidebar-accent-foreground: #000000;
-  --sidebar-border: #000000;
-  --sidebar-ring: #1d4ed8;
+  --sidebar-accent: #f1f5f9;
+  --sidebar-accent-foreground: #0f172a;
+  --sidebar-border: #e2e8f0;
+  --sidebar-ring: #2563eb;
 }
 
-/* Light theme only — Swiss/Brutalist works on the warm Canvas background.
-   The half-finished dark mode mapping was removed; .impeccable.md commits
-   to light only. */
-
+/* Modern-Minimalist Base & Upstream CSS Bridge */
 @layer base {
   * {
     @apply border-border outline-ring/50;
   }
   body {
-    @apply bg-background text-foreground;
+    @apply bg-background text-foreground antialiased;
     font-family: var(--font-sans);
   }
   input,
@@ -145,9 +144,27 @@
   select {
     font-family: inherit;
   }
-  /* The global `button { font-family: var(--font-mono) }` rule was removed.
-     The Button component applies font-mono via its Tailwind classes, and the
-     global rule was leaking into nested text inside <button> elements. */
+}
+
+/* =========================================================================
+   INTELLIGENT CSS BRIDGE (UPSTREAM COMPATIBILITY)
+   Remaps legacy brutalist utility classes (e.g. .border-black) to
+   refined slate borders and soft surfaces in web UI, while completely
+   preserving resume templates (.resume-body) and print outputs.
+   ========================================================================= */
+:where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .border-black) {
+  border-color: var(--color-border);
+}
+
+:where(:not(.resume-body, .resume-print, .cover-letter-print, [data-preserve-style]) .border-2.border-black) {
+  border-color: var(--color-border);
+  border-width: 1px;
+}
+
+/* Ambient Dot Pattern background for modern dashboards */
+.modern-grid-pattern {
+  background-image: radial-gradient(circle, rgba(148, 163, 184, 0.2) 1px, transparent 1px);
+  background-size: 24px 24px;
 }
 
 @media print {

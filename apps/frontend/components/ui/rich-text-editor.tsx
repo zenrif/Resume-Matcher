@@ -141,12 +141,12 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   // Show loading state during SSR
   if (!isMounted) {
     return (
-      <div className={cn('space-y-1', className)}>
-        <div className="flex items-center gap-1 p-1 border border-black bg-secondary h-9" />
+      <div className={cn('space-y-1.5', className)}>
+        <div className="flex items-center gap-1 p-1 rounded-lg border border-slate-200/80 bg-slate-100/80 h-9" />
         <div
           className={cn(
-            'w-full border border-black bg-white',
-            'px-3 py-2 text-sm text-steel-grey rounded-none'
+            'w-full rounded-lg border border-slate-200/90 bg-white shadow-sw-xs',
+            'px-3.5 py-2.5 text-sm text-slate-400'
           )}
           style={{ minHeight }}
         >
@@ -161,16 +161,16 @@ export const RichTextEditor: React.FC<RichTextEditorProps> = ({
   }
 
   return (
-    <div className={cn('space-y-1', className)}>
+    <div className={cn('space-y-1.5', className)}>
       <RichTextToolbar editor={editor} onLinkClick={handleLinkClick} />
       <div
         className={cn(
-          'w-full border border-black bg-white',
-          'px-3 py-2 text-sm text-black rounded-none',
-          'focus-within:ring-1 focus-within:ring-blue-700',
+          'w-full rounded-lg border border-slate-200/90 bg-white shadow-sw-xs',
+          'px-3.5 py-2.5 text-sm text-slate-900',
+          'focus-within:border-primary focus-within:ring-2 focus-within:ring-primary/20 transition-all',
           '[&_.ProseMirror]:outline-none [&_.ProseMirror]:min-h-[36px]',
           '[&_.ProseMirror_p]:m-0',
-          '[&_.ProseMirror_a]:text-blue-700 [&_.ProseMirror_a]:underline'
+          '[&_.ProseMirror_a]:text-primary [&_.ProseMirror_a]:underline font-medium'
         )}
         style={{ minHeight }}
       >

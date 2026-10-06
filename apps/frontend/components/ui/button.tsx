@@ -39,130 +39,112 @@ export interface ButtonProps extends React.ButtonHTMLAttributes<HTMLButtonElemen
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
   ({ className, variant = 'default', size = 'default', ...props }, ref) => {
     // Base styles applied to ALL buttons
-    // Swiss Design: clean, functional, high contrast
+    // Modern-Minimalist: clean, tactile, refined typography
     const baseStyles = cn(
       // Layout & Typography
       'relative inline-flex items-center justify-center gap-2',
-      'whitespace-nowrap text-sm font-medium font-mono uppercase tracking-wide',
-      // Transitions — only the properties that actually change on hover/active.
-      // Avoids the perf footgun of `transition-all` and matches Swiss "snap" feel.
-      'transition-[transform,box-shadow,background-color] duration-100 ease-out',
-      // Focus state - sharp blue ring (not soft glow)
-      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2',
+      'whitespace-nowrap text-sm font-medium font-sans tracking-normal select-none',
+      // Fluid micro-motion with spring feel
+      'transition-all duration-150 cubic-bezier(0.16, 1, 0.3, 1)',
+      // Focus state - modern soft ring with offset
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-2',
       // Disabled state
-      'disabled:pointer-events-none disabled:opacity-50',
+      'disabled:pointer-events-none disabled:opacity-50 disabled:shadow-none',
       // SVG icon sizing
       "[&_svg]:pointer-events-none [&_svg:not([class*='size-'])]:size-4 [&_svg]:shrink-0",
-      // Swiss Design: NO rounded corners
-      'rounded-none'
+      // Modern-Minimalist: rounded-lg corner
+      'rounded-lg'
     );
 
-    // Hit-area expansion for icon-only buttons. Many call sites override
-    // size="icon" with smaller h-X w-X classes for dense toolbars (h-8 w-8,
-    // h-7 w-7, etc.) — those visible sizes are under WCAG 2.5.8's 44×44 target
-    // size minimum. The ::before pseudo-element extends the touch area by 6px
-    // on each side without affecting visible layout, so a 32×32 button gets a
-    // 44×44 touch target. For h-7 and smaller, the touch area still falls
-    // short — those need an additional inline override at the call site
-    // (e.g. before:-inset-[10px]).
+    // Hit-area expansion for icon-only buttons
     const iconHitArea = "before:absolute before:-inset-1.5 before:content-['']";
 
-    // Variant styles - each has distinct purpose and color
+    // Variant styles - refined modern palettes and tactile feedback
     const variants = {
-      // PRIMARY - Hyper Blue (#1D4ED8 / blue-700)
+      // PRIMARY - Modern Vibrant Blue
       // Use for: Save, Submit, Create, Primary CTA
       default: cn(
-        'bg-blue-700 text-white',
-        'border border-black',
-        'shadow-sw-sm',
-        'hover:bg-blue-800',
-        'hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none',
-        'active:translate-y-[2px] active:translate-x-[2px]'
+        'bg-primary text-white',
+        'border border-blue-600/30',
+        'shadow-sw-xs',
+        'hover:bg-blue-600 hover:shadow-sw-sm hover:-translate-y-0.5',
+        'active:translate-y-0 active:scale-[0.98]'
       ),
 
-      // DESTRUCTIVE - Alert Red (#DC2626 / red-600)
+      // DESTRUCTIVE - Clean Alert Red
       // Use for: Delete, Remove, Destroy, Dangerous actions
       destructive: cn(
-        'bg-red-600 text-white',
-        'border border-black',
-        'shadow-sw-sm',
-        'hover:bg-red-700',
-        'hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none',
-        'active:translate-y-[2px] active:translate-x-[2px]'
+        'bg-destructive text-white',
+        'border border-red-500/30',
+        'shadow-sw-xs',
+        'hover:bg-red-600 hover:shadow-sw-sm hover:-translate-y-0.5',
+        'active:translate-y-0 active:scale-[0.98]'
       ),
 
-      // SUCCESS - Signal Green (#15803D / green-700)
+      // SUCCESS - Signal Emerald Green
       // Use for: Download, Confirm, Complete, Positive actions
       success: cn(
-        'bg-green-700 text-white',
-        'border border-black',
-        'shadow-sw-sm',
-        'hover:bg-green-800',
-        'hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none',
-        'active:translate-y-[2px] active:translate-x-[2px]'
+        'bg-success text-white',
+        'border border-emerald-600/30',
+        'shadow-sw-xs',
+        'hover:bg-emerald-600 hover:shadow-sw-sm hover:-translate-y-0.5',
+        'active:translate-y-0 active:scale-[0.98]'
       ),
 
-      // WARNING - Alert Orange (#F97316 / orange-500)
+      // WARNING - Clean Amber / Alert Orange
       // Use for: Reset, Clear, Undo, Caution actions
       warning: cn(
-        'bg-orange-500 text-white',
-        'border border-black',
-        'shadow-sw-sm',
-        'hover:bg-orange-600',
-        'hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none',
-        'active:translate-y-[2px] active:translate-x-[2px]'
+        'bg-warning text-white',
+        'border border-amber-500/30',
+        'shadow-sw-xs',
+        'hover:bg-amber-600 hover:shadow-sw-sm hover:-translate-y-0.5',
+        'active:translate-y-0 active:scale-[0.98]'
       ),
 
-      // OUTLINE - Canvas background with black border
+      // OUTLINE - Clean white with subtle slate border
       // Use for: Cancel, Back, Secondary actions, Navigation
       outline: cn(
-        'bg-background text-black',
-        'border border-black',
-        'shadow-sw-sm',
-        'hover:bg-secondary',
-        'hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none',
-        'active:translate-y-[2px] active:translate-x-[2px]'
+        'bg-white text-slate-800',
+        'border border-slate-200/90',
+        'shadow-sw-xs',
+        'hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-sw-sm',
+        'active:translate-y-0 active:scale-[0.98]'
       ),
 
-      // SECONDARY - Panel Grey (#E5E5E0)
+      // SECONDARY - Subtle Slate-100 Pill
       // Use for: Less prominent actions, Toolbar buttons
       secondary: cn(
-        'bg-secondary text-black',
-        'border border-black',
-        'shadow-sw-sm',
-        'hover:bg-[#D8D8D2]',
-        'hover:translate-y-[1px] hover:translate-x-[1px] hover:shadow-none',
-        'active:translate-y-[2px] active:translate-x-[2px]'
+        'bg-slate-100 text-slate-800',
+        'border border-transparent',
+        'shadow-sw-xs',
+        'hover:bg-slate-200/80 hover:text-slate-900 hover:-translate-y-0.5',
+        'active:translate-y-0 active:scale-[0.98]'
       ),
 
-      // GHOST - No background, minimal styling
+      // GHOST - Minimal hover highlight
       // Use for: Icon buttons, Subtle navigation, Toolbars
       ghost: cn(
-        'bg-transparent text-black',
+        'bg-transparent text-slate-700',
         'border-none shadow-none',
-        'hover:bg-paper-tint',
-        'active:bg-paper-tint'
+        'hover:bg-slate-100 hover:text-slate-900',
+        'active:scale-[0.98]'
       ),
 
       // LINK - Text only with underline
       // Use for: Inline links, Text navigation
       link: cn(
-        'bg-transparent text-blue-700',
+        'bg-transparent text-primary',
         'border-none shadow-none',
         'underline-offset-4 hover:underline',
         'p-0 h-auto'
       ),
     };
 
-    // Size styles. Icon variant is 44×44px to meet WCAG 2.2 AA target size
-    // (success criterion 2.5.8). Call sites that override the visible size
-    // with smaller h-X w-X classes get the touch-area expansion via the
-    // iconHitArea overlay above.
     const sizes = {
-      default: 'h-10 px-6 py-2',
-      sm: 'h-8 px-4 py-1 text-xs',
-      lg: 'h-12 px-8 py-3 text-base',
-      icon: cn('h-11 w-11 p-0', iconHitArea),
+      default: 'h-9.5 px-5 py-2',
+      sm: 'h-8 px-3.5 py-1 text-xs rounded-md',
+      lg: 'h-11 px-7 py-2.5 text-base rounded-xl',
+      icon: cn('h-9.5 w-9.5 p-0 rounded-lg', iconHitArea),
     };
 
     const variantClass = variants[variant];

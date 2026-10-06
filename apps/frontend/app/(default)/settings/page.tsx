@@ -689,16 +689,15 @@ export default function SettingsPage() {
     : t('settings.llmConfiguration.baseUrlDescription');
 
   return (
-    <div className="flex flex-col items-center justify-start p-6 md:p-12 min-h-screen overflow-y-auto">
-      <div className="w-full max-w-4xl border border-black bg-background shadow-sw-lg">
+    <div className="flex flex-col items-center justify-start p-4 sm:p-6 md:p-10 min-h-[100dvh] overflow-y-auto bg-background modern-grid-pattern">
+      <div className="w-full max-w-4xl rounded-2xl border border-slate-200/90 bg-white shadow-sw-card overflow-hidden">
         {/* Header */}
-        <div className="border-b border-black p-8 bg-white flex justify-between items-start">
+        <div className="border-b border-slate-100 p-6 md:p-8 bg-white/90 backdrop-blur-sm flex justify-between items-start">
           <div>
-            <h1 className="font-serif text-3xl font-bold tracking-tight uppercase">
+            <h1 className="font-sans text-2xl md:text-3xl font-bold tracking-tight text-slate-900">
               {t('settings.title')}
             </h1>
-            <p className="font-mono text-xs text-steel-grey mt-2 uppercase tracking-wider">
-              {'// '}
+            <p className="font-sans text-xs md:text-sm text-slate-500 mt-1.5 tracking-normal">
               {t('settings.subtitle')}
             </p>
           </div>

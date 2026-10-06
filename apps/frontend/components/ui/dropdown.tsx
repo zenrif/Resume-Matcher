@@ -59,21 +59,16 @@ export function Dropdown({
   };
 
   return (
-    <div className={`space-y-1 ${className}`} ref={containerRef}>
+    <div className={`space-y-1.5 ${className}`} ref={containerRef}>
       {label && (
-        <label className="font-mono text-xs font-bold uppercase tracking-wider text-ink-soft block">
+        <label className="font-sans text-xs font-semibold uppercase tracking-wider text-slate-600 block">
           {label}
         </label>
       )}
 
-      {description && <p className="text-sm text-ink-soft">{description}</p>}
+      {description && <p className="text-xs text-slate-500 font-sans">{description}</p>}
 
       <div className="relative">
-        {/* Trigger Button.
-            aria-haspopup="menu" matches the actual popup semantics: options
-            commit on click (not select-then-activate), which is a menu
-            pattern, not listbox. aria-controls wires the trigger to the
-            popup id so screen readers know they're linked. */}
         <button
           ref={buttonRef}
           type="button"
@@ -83,67 +78,61 @@ export function Dropdown({
           aria-expanded={isOpen}
           aria-controls={isOpen ? menuId : undefined}
           aria-label={label}
-          className="w-full flex items-center justify-between border border-black bg-white px-4 py-3 font-mono text-sm transition-all duration-150 ease-out shadow-sw-sm hover:shadow-none hover:translate-y-[2px] hover:translate-x-[2px] disabled:opacity-50 disabled:cursor-not-allowed rounded-none"
+          className="w-full flex items-center justify-between rounded-lg border border-slate-200/90 bg-white px-3.5 py-2.5 font-sans text-sm text-slate-900 transition-all duration-150 shadow-sw-xs hover:border-slate-300 hover:shadow-sw-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20 disabled:opacity-50 disabled:cursor-not-allowed"
         >
           <div className="flex-1 text-left min-w-0">
             {selectedOption ? (
               <div>
-                <div className="font-bold text-black truncate">{selectedOption.label}</div>
+                <div className="font-medium text-slate-900 truncate">{selectedOption.label}</div>
                 {selectedOption.description && (
-                  <div className="text-xs text-steel-grey mt-1 font-normal truncate">
+                  <div className="text-xs text-slate-500 mt-0.5 font-normal truncate">
                     {selectedOption.description}
                   </div>
                 )}
               </div>
             ) : (
-              <span className="text-steel-grey">{t('common.selectOption')}</span>
+              <span className="text-slate-400">{t('common.selectOption')}</span>
             )}
           </div>
           <ChevronDown
-            className={`w-4 h-4 transition-transform duration-200 ml-2 shrink-0 ${
-              isOpen ? 'rotate-180' : ''
+            className={`w-4 h-4 text-slate-400 transition-transform duration-200 ml-2 shrink-0 ${
+              isOpen ? 'rotate-180 text-primary' : ''
             }`}
           />
         </button>
 
-        {/* Dropdown Menu. Uses menuitemradio (not plain menuitem) because
-            this is a single-value selector, not a command menu — options
-            express a mutually-exclusive selection. aria-checked on the
-            selected item lets screen readers announce which option is
-            currently active. A full listbox pattern would also be valid
-            but needs arrow-key navigation + aria-activedescendant, which
-            is tracked as a follow-up. */}
         {isOpen && (
           <div
             id={menuId}
             role="menu"
             aria-label={label}
-            className="absolute top-full left-0 right-0 mt-1 z-50 border border-black bg-white shadow-sw-default rounded-none"
+            className="absolute top-full left-0 right-0 mt-1.5 z-50 rounded-xl border border-slate-200/90 bg-white shadow-sw-lg overflow-hidden p-1.5 animate-in fade-in-0 zoom-in-95 duration-150"
           >
-            <div className="max-h-64 overflow-y-auto">
-              {options.map((option, index) => (
-                <React.Fragment key={option.id}>
-                  <button
-                    role="menuitemradio"
-                    aria-checked={option.id === value}
-                    onClick={() => handleSelect(option.id)}
-                    className={`w-full px-4 py-3 text-left font-mono transition-colors duration-150 border border-black ${
-                      option.id === value
-                        ? 'bg-green-700 text-white'
-                        : 'bg-white text-black hover:bg-paper-tint'
-                    } ${index > 0 ? '-mt-[1px]' : ''} active:bg-paper-tint`}
-                  >
-                    <div className="flex items-start justify-between gap-2">
-                      <div className="flex-1">
-                        <div className="font-bold text-sm">{option.label}</div>
-                        {option.description && (
-                          <div className="text-xs mt-1 opacity-80">{option.description}</div>
-                        )}
-                      </div>
-                      {option.id === value && <div className="text-lg font-bold mt-0.5">✓</div>}
+            <div className="max-h-64 overflow-y-auto space-y-0.5">
+              {options.map((option) => (
+                <button
+                  key={option.id}
+                  role="menuitemradio"
+                  aria-checked={option.id === value}
+                  onClick={() => handleSelect(option.id)}
+                  className={`w-full px-3 py-2 text-left font-sans text-sm rounded-lg transition-colors duration-150 ${
+                    option.id === value
+                      ? 'bg-blue-50 text-primary font-medium'
+                      : 'text-slate-700 hover:bg-slate-50'
+                  }`}
+                >
+                  <div className="flex items-center justify-between gap-2">
+                    <div className="flex-1 min-w-0">
+                      <div className="truncate">{option.label}</div>
+                      {option.description && (
+                        <div className="text-xs text-slate-500 mt-0.5 truncate">{option.description}</div>
+                      )}
                     </div>
-                  </button>
-                </React.Fragment>
+                    {option.id === value && (
+                      <span className="text-primary font-bold text-sm shrink-0">✓</span>
+                    )}
+                  </div>
+                </button>
               ))}
             </div>
           </div>

@@ -136,7 +136,7 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
     <div className="fixed inset-0 z-50">
       {/* Overlay */}
       <div
-        className="fixed inset-0 bg-black/50 animate-in fade-in-0"
+        className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm animate-in fade-in-0 duration-200"
         onClick={() => onOpenChange(false)}
       />
       {/* Content */}
@@ -147,8 +147,7 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
           aria-labelledby={titleId}
           className={cn(
             'relative w-full max-w-lg',
-            'border border-black bg-background shadow-sw-lg',
-            'rounded-none',
+            'rounded-2xl border border-slate-200/90 bg-white shadow-sw-xl overflow-hidden p-6 md:p-8',
             'animate-in fade-in-0 zoom-in-95 duration-200',
             className
           )}
@@ -157,9 +156,9 @@ const DialogContent: React.FC<DialogContentProps> = ({ children, className }) =>
           {children}
           <button
             onClick={() => onOpenChange(false)}
-            className="absolute right-4 top-4 opacity-70 transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-blue-700 focus:ring-offset-2"
+            className="absolute right-4 top-4 rounded-lg p-1.5 text-slate-400 transition-colors hover:bg-slate-100 hover:text-slate-700 focus:outline-none focus:ring-2 focus:ring-primary/20"
           >
-            <X className="h-5 w-5" />
+            <X className="h-4 w-4" />
             <span className="sr-only">{t('common.close')}</span>
           </button>
         </div>
@@ -175,7 +174,7 @@ interface DialogHeaderProps {
 }
 
 const DialogHeader: React.FC<DialogHeaderProps> = ({ className, children, ...props }) => (
-  <div className={cn('flex flex-col space-y-1.5 text-center sm:text-left', className)} {...props}>
+  <div className={cn('flex flex-col space-y-1.5 text-left mb-5', className)} {...props}>
     {children}
   </div>
 );
@@ -187,7 +186,7 @@ interface DialogFooterProps {
 
 const DialogFooter: React.FC<DialogFooterProps> = ({ className, children, ...props }) => (
   <div
-    className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-2', className)}
+    className={cn('flex flex-col-reverse sm:flex-row sm:justify-end sm:space-x-3 mt-6 gap-2 sm:gap-0', className)}
     {...props}
   >
     {children}
@@ -204,7 +203,7 @@ const DialogTitle: React.FC<DialogTitleProps> = ({ className, children, ...props
   return (
     <h2
       id={titleId}
-      className={cn('font-serif text-lg font-bold leading-none tracking-tight', className)}
+      className={cn('font-sans text-xl font-semibold leading-tight tracking-tight text-slate-900', className)}
       {...props}
     >
       {children}
@@ -218,7 +217,7 @@ interface DialogDescriptionProps {
 }
 
 const DialogDescription: React.FC<DialogDescriptionProps> = ({ className, children, ...props }) => (
-  <p className={cn('text-sm text-ink-soft', className)} {...props}>
+  <p className={cn('text-sm text-slate-500 font-sans leading-relaxed', className)} {...props}>
     {children}
   </p>
 );

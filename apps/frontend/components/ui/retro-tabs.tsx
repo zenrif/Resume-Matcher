@@ -33,7 +33,7 @@ export const RetroTabs: React.FC<RetroTabsProps> = ({
   className,
 }) => {
   return (
-    <div className={cn('flex gap-0 border-b border-black', className)}>
+    <div className={cn('inline-flex items-center gap-1 p-1 bg-slate-100/90 rounded-lg border border-slate-200/80', className)}>
       {tabs.map((tab) => {
         const isActive = activeTab === tab.id;
         const isDisabled = tab.disabled;
@@ -44,17 +44,14 @@ export const RetroTabs: React.FC<RetroTabsProps> = ({
             onClick={() => !isDisabled && onTabChange(tab.id)}
             disabled={isDisabled}
             className={cn(
-              'px-4 py-2 font-mono text-xs uppercase tracking-wider transition-all',
-              'border border-b-0 border-black -mb-px',
-              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-700 focus-visible:ring-offset-2',
+              'px-3.5 py-1.5 font-sans text-xs font-medium rounded-md transition-all duration-150 select-none',
+              'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/20',
               isActive && [
-                'bg-white text-black font-bold',
-                'shadow-[2px_-2px_0px_0px_rgba(0,0,0,0.1)]',
-                'border-b-white',
+                'bg-white text-slate-900 font-semibold shadow-sw-xs',
               ],
               !isActive &&
-                !isDisabled && ['bg-secondary text-ink-soft hover:bg-[#D8D8D2] hover:text-black'],
-              isDisabled && ['bg-paper-tint text-steel-grey cursor-not-allowed opacity-50']
+                !isDisabled && ['text-slate-600 hover:text-slate-900 hover:bg-white/60'],
+              isDisabled && ['text-slate-400 cursor-not-allowed opacity-50']
             )}
           >
             {tab.label}

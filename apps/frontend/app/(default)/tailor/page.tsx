@@ -413,8 +413,8 @@ export default function TailorPage() {
   };
 
   return (
-    <div className="min-h-screen w-full bg-[#F6F5EE] flex flex-col items-center justify-center p-4 md:p-8 font-sans">
-      <div className="w-full max-w-4xl bg-white border border-black shadow-sw-lg p-8 md:p-12 lg:p-14 relative">
+    <div className="min-h-[100dvh] w-full bg-background modern-grid-pattern flex flex-col items-center justify-center p-4 md:p-8 font-sans">
+      <div className="w-full max-w-4xl bg-white rounded-2xl border border-slate-200/90 shadow-sw-card p-8 md:p-12 lg:p-14 relative">
         {/* Back Button */}
         <Button variant="link" className="absolute top-4 left-4" onClick={() => router.back()}>
           <ArrowLeft className="w-4 h-4" />
@@ -422,22 +422,21 @@ export default function TailorPage() {
         </Button>
 
         <div className="mb-8 mt-4 text-center">
-          <h1 className="font-serif text-4xl font-bold uppercase tracking-tight mb-2">
+          <h1 className="font-sans text-3xl md:text-4xl font-bold tracking-tight text-slate-900 mb-2">
             {t('tailor.heroTitle')}
           </h1>
-          <p className="font-mono text-sm text-blue-700 font-bold uppercase">
-            {'// '}
+          <p className="font-sans text-sm text-primary font-medium">
             {t('tailor.pasteJobDescriptionBelow')}
           </p>
         </div>
 
         {/* LLM Not Configured Warning */}
         {!statusLoading && !isLlmConfigured && (
-          <div className="mb-6 border-2 border-amber-500 bg-amber-50 p-4 shadow-sw-default">
+          <div className="mb-6 rounded-xl border border-amber-200 bg-amber-50/90 p-4 shadow-sw-xs">
             <div className="flex items-start gap-3">
               <AlertTriangle className="w-5 h-5 text-amber-600 shrink-0 mt-0.5" />
               <div className="flex-1">
-                <p className="font-mono text-sm font-bold uppercase tracking-wider text-amber-800">
+                <p className="font-sans text-sm font-semibold text-amber-900">
                   {t('tailor.setupRequiredTitle')}
                 </p>
                 <p className="font-mono text-xs text-amber-700 mt-1">
