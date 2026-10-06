@@ -104,29 +104,29 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
       // OUTLINE - Clean white with subtle slate border
       // Use for: Cancel, Back, Secondary actions, Navigation
       outline: cn(
-        'bg-white text-slate-800',
-        'border border-slate-200/90',
+        'bg-white dark:bg-slate-900 text-slate-800 dark:text-slate-200',
+        'border border-slate-200/90 dark:border-slate-800',
         'shadow-sw-xs',
-        'hover:bg-slate-50 hover:text-slate-900 hover:border-slate-300 hover:-translate-y-0.5 hover:shadow-sw-sm',
+        'hover:bg-slate-50 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white hover:border-slate-300 dark:hover:border-slate-700 hover:-translate-y-0.5 hover:shadow-sw-sm',
         'active:translate-y-0 active:scale-[0.98]'
       ),
 
       // SECONDARY - Subtle Slate-100 Pill
       // Use for: Less prominent actions, Toolbar buttons
       secondary: cn(
-        'bg-slate-100 text-slate-800',
+        'bg-slate-100 dark:bg-slate-800 text-slate-800 dark:text-slate-200',
         'border border-transparent',
         'shadow-sw-xs',
-        'hover:bg-slate-200/80 hover:text-slate-900 hover:-translate-y-0.5',
+        'hover:bg-slate-200/80 dark:hover:bg-slate-700 hover:text-slate-900 dark:hover:text-white hover:-translate-y-0.5',
         'active:translate-y-0 active:scale-[0.98]'
       ),
 
       // GHOST - Minimal hover highlight
       // Use for: Icon buttons, Subtle navigation, Toolbars
       ghost: cn(
-        'bg-transparent text-slate-700',
+        'bg-transparent text-slate-700 dark:text-slate-300',
         'border-none shadow-none',
-        'hover:bg-slate-100 hover:text-slate-900',
+        'hover:bg-slate-100 dark:hover:bg-slate-800 hover:text-slate-900 dark:hover:text-white',
         'active:scale-[0.98]'
       ),
 

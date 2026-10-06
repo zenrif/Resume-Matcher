@@ -150,24 +150,24 @@ export function AccountSection() {
   return (
     <section className="space-y-6">
       {/* Header */}
-      <div className="flex items-center gap-2 border-b border-black/10 pb-2">
-        <Key className="w-4 h-4" />
-        <h2 className="font-mono text-sm font-bold uppercase tracking-wider">
+      <div className="flex items-center gap-2 border-b border-slate-200/80 dark:border-slate-800 pb-2">
+        <Key className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+        <h2 className="font-sans text-sm font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
           {t('settings.account.title')}
         </h2>
       </div>
 
       <div className="grid gap-6 md:grid-cols-2">
         {/* Profile Card */}
-        <div className="border border-black bg-white p-6 shadow-sw-sm space-y-4">
+        <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sw-xs space-y-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <UserIcon className="w-4 h-4 text-blue-700" />
-              <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-black">
+              <UserIcon className="w-4 h-4 text-primary" />
+              <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
                 {t('settings.account.profileTitle')}
               </h3>
             </div>
-            <span className="font-mono text-xs text-steel-grey uppercase">
+            <span className="font-sans text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
               {user?.role === 'admin'
                 ? t('settings.users.roleAdmin')
                 : t('settings.users.roleUser')}
@@ -175,14 +175,14 @@ export function AccountSection() {
           </div>
 
           {profileSuccess && (
-            <div className="border border-green-500 bg-green-50 p-3 flex items-center gap-2 text-xs font-mono text-green-700">
+            <div className="border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-lg flex items-center gap-2 text-xs font-sans text-emerald-700 dark:text-emerald-300">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{t('settings.account.profileUpdated')}</span>
             </div>
           )}
 
           {profileError && (
-            <div className="border border-red-500 bg-red-50 p-3 flex items-center gap-2 text-xs font-mono text-red-700">
+            <div className="border border-red-500/40 bg-red-50 dark:bg-red-950/40 p-3 rounded-lg flex items-center gap-2 text-xs font-sans text-red-700 dark:text-red-300">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{profileError}</span>
             </div>
@@ -190,7 +190,7 @@ export function AccountSection() {
 
           <form onSubmit={handleProfileSubmit} className="space-y-3">
             <div className="space-y-1">
-              <Label htmlFor="accountEmail" className="text-xs font-mono uppercase text-steel-grey">
+              <Label htmlFor="accountEmail" className="text-xs font-sans font-medium uppercase text-slate-500 dark:text-slate-400">
                 {t('auth.email')}
               </Label>
               <Input
@@ -199,12 +199,12 @@ export function AccountSection() {
                 value={user?.email ?? ''}
                 readOnly
                 disabled
-                className="font-mono text-xs h-9 bg-paper-tint text-steel-grey cursor-not-allowed"
+                className="font-sans text-xs h-9 bg-slate-100/80 dark:bg-slate-800/80 text-slate-500 dark:text-slate-400 border-slate-200 dark:border-slate-700 cursor-not-allowed"
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="displayName" className="text-xs font-mono uppercase">
+              <Label htmlFor="displayName" className="text-xs font-sans font-medium uppercase text-slate-700 dark:text-slate-300">
                 {t('settings.account.displayName')}
               </Label>
               <Input
@@ -220,7 +220,7 @@ export function AccountSection() {
                 required
                 maxLength={100}
                 placeholder={t('settings.account.displayNamePlaceholder')}
-                className="font-mono text-xs h-9"
+                className="font-sans text-xs h-9"
                 disabled={profileLoading}
               />
             </div>
@@ -233,7 +233,7 @@ export function AccountSection() {
                 displayName.trim() === (user?.display_name ?? '')
               }
               size="sm"
-              className="w-full font-mono text-xs uppercase font-bold"
+              className="w-full font-sans text-xs uppercase font-semibold rounded-lg"
             >
               {profileLoading ? (
                 <>
@@ -248,23 +248,23 @@ export function AccountSection() {
         </div>
 
         {/* Change Password Form */}
-        <div className="border border-black bg-white p-6 shadow-sw-sm space-y-4">
+        <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sw-xs space-y-4">
           <div className="flex items-center gap-2">
-            <Key className="w-4 h-4 text-steel-grey" />
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-black">
+            <Key className="w-4 h-4 text-slate-400 dark:text-slate-500" />
+            <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
               {t('settings.account.changePassword')}
             </h3>
           </div>
 
           {passwordSuccess && (
-            <div className="border border-green-500 bg-green-50 p-3 flex items-center gap-2 text-xs font-mono text-green-700">
+            <div className="border border-emerald-500/40 bg-emerald-50 dark:bg-emerald-950/40 p-3 rounded-lg flex items-center gap-2 text-xs font-sans text-emerald-700 dark:text-emerald-300">
               <CheckCircle2 className="w-4 h-4 shrink-0" />
               <span>{t('settings.account.passwordUpdated')}</span>
             </div>
           )}
 
           {passwordError && (
-            <div className="border border-red-500 bg-red-50 p-3 flex items-center gap-2 text-xs font-mono text-red-700">
+            <div className="border border-red-500/40 bg-red-50 dark:bg-red-950/40 p-3 rounded-lg flex items-center gap-2 text-xs font-sans text-red-700 dark:text-red-300">
               <AlertTriangle className="w-4 h-4 shrink-0" />
               <span>{passwordError}</span>
             </div>
@@ -272,7 +272,7 @@ export function AccountSection() {
 
           <form onSubmit={handlePasswordSubmit} className="space-y-3">
             <div className="space-y-1">
-              <Label htmlFor="currentPassword" className="text-xs font-mono uppercase">
+              <Label htmlFor="currentPassword" className="text-xs font-sans font-medium uppercase text-slate-700 dark:text-slate-300">
                 {t('settings.account.currentPassword')}
               </Label>
               <Input
@@ -281,13 +281,13 @@ export function AccountSection() {
                 value={currentPassword}
                 onChange={(e) => setCurrentPassword(e.target.value)}
                 required
-                className="font-mono text-xs h-9"
+                className="font-sans text-xs h-9"
                 disabled={passwordLoading}
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="newPassword" className="text-xs font-mono uppercase">
+              <Label htmlFor="newPassword" className="text-xs font-sans font-medium uppercase text-slate-700 dark:text-slate-300">
                 {t('settings.account.newPassword')}
               </Label>
               <Input
@@ -296,13 +296,13 @@ export function AccountSection() {
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
                 required
-                className="font-mono text-xs h-9"
+                className="font-sans text-xs h-9"
                 disabled={passwordLoading}
               />
             </div>
 
             <div className="space-y-1">
-              <Label htmlFor="confirmNewPassword" className="text-xs font-mono uppercase">
+              <Label htmlFor="confirmNewPassword" className="text-xs font-sans font-medium uppercase text-slate-700 dark:text-slate-300">
                 {t('settings.account.confirmNewPassword')}
               </Label>
               <Input
@@ -311,7 +311,7 @@ export function AccountSection() {
                 value={confirmNewPassword}
                 onChange={(e) => setConfirmNewPassword(e.target.value)}
                 required
-                className="font-mono text-xs h-9"
+                className="font-sans text-xs h-9"
                 disabled={passwordLoading}
               />
             </div>
@@ -320,7 +320,7 @@ export function AccountSection() {
               type="submit"
               disabled={passwordLoading}
               size="sm"
-              className="w-full font-mono text-xs uppercase font-bold"
+              className="w-full font-sans text-xs uppercase font-semibold rounded-lg"
             >
               {passwordLoading ? (
                 <>
@@ -336,15 +336,15 @@ export function AccountSection() {
       </div>
 
       {/* Daily Quota Card */}
-      <div className="border border-black bg-white p-6 shadow-sw-sm space-y-4">
+      <div className="rounded-xl border border-slate-200/90 dark:border-slate-800 bg-white dark:bg-slate-900 p-6 shadow-sw-xs space-y-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-blue-700" />
-            <h3 className="font-mono text-xs font-bold uppercase tracking-wider text-black">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <h3 className="font-sans text-xs font-bold uppercase tracking-wider text-slate-900 dark:text-slate-100">
               {t('settings.account.quotaTitle')}
             </h3>
           </div>
-          <span className="font-mono text-xs text-steel-grey uppercase">
+          <span className="font-sans text-xs text-slate-500 dark:text-slate-400 font-semibold uppercase">
             {user?.role === 'admin'
               ? t('settings.users.roleAdmin')
               : t('settings.users.roleUser')}
@@ -353,32 +353,32 @@ export function AccountSection() {
 
         <div className="space-y-2">
           <div className="flex justify-between items-baseline">
-            <span className="font-mono text-2xl font-bold">
+            <span className="font-sans text-2xl font-bold text-slate-900 dark:text-slate-100">
               {used}
               {!isUnlimited && (
-                <span className="text-sm font-normal text-steel-grey"> / {limit}</span>
+                <span className="text-sm font-normal text-slate-500 dark:text-slate-400"> / {limit}</span>
               )}
             </span>
-            <span className="font-mono text-xs font-semibold text-blue-700 uppercase">
+            <span className="font-sans text-xs font-semibold text-primary uppercase">
               {isUnlimited ? t('settings.users.quotaUnlimitedLabel') : `${percentUsed}% USED`}
             </span>
           </div>
 
-          {/* Swiss Progress Bar */}
+          {/* Pill Progress Bar */}
           {!isUnlimited ? (
-            <div className="w-full h-3 border border-black bg-paper-tint relative overflow-hidden">
+            <div className="w-full h-2.5 rounded-full bg-slate-100 dark:bg-slate-800 relative overflow-hidden">
               <div
-                className="h-full bg-blue-700 transition-all duration-300"
+                className="h-full rounded-full bg-primary transition-all duration-300"
                 style={{ width: `${percentUsed}%` }}
               />
             </div>
           ) : (
-            <p className="font-mono text-xs text-steel-grey">
+            <p className="font-sans text-xs text-slate-500 dark:text-slate-400">
               {t('settings.account.quotaUnlimited', { used })}
             </p>
           )}
 
-          <div className="flex items-center gap-1.5 pt-2 text-[11px] font-mono text-steel-grey">
+          <div className="flex items-center gap-1.5 pt-2 text-[11px] font-sans text-slate-500 dark:text-slate-400">
             <Clock className="w-3.5 h-3.5" />
             <span>{t('settings.account.quotaResetsMidnight')}</span>
           </div>
