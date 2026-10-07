@@ -106,20 +106,15 @@ export const ResumeModernTwoColumn: React.FC<ResumeModernTwoColumnProps> = ({
   const renderContactDetail = (label: string, value?: string, hrefPrefix: string = '') => {
     if (!value) return null;
 
+    const isAbsolute = value.startsWith('http') || value.startsWith('//');
+
     let finalHrefPrefix = hrefPrefix;
-    if (
-      ['Website', 'LinkedIn', 'GitHub'].includes(label) &&
-      !value.startsWith('http') &&
-      !value.startsWith('//')
-    ) {
+    if (['Website', 'LinkedIn', 'GitHub'].includes(label) && !isAbsolute) {
       finalHrefPrefix = 'https://';
     }
 
-    const href = finalHrefPrefix + value;
-    const isLink =
-      finalHrefPrefix.startsWith('http') ||
-      finalHrefPrefix.startsWith('mailto:') ||
-      finalHrefPrefix.startsWith('tel:');
+    const href = isAbsolute ? value : finalHrefPrefix + value;
+    const isLink = /^(https?:|\/\/|mailto:|tel:)/.test(href);
 
     let displayText = value;
     if (isLink && (label === 'LinkedIn' || label === 'GitHub' || label === 'Website')) {
