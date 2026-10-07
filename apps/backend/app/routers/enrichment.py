@@ -545,7 +545,7 @@ async def _regenerate_experience_or_project(
 
     result = await complete_json(
         prompt,
-        max_tokens=4096,
+        max_tokens=8192,
         schema_type="diff",
         response_validator=_validate_regenerated_item_result,
     )

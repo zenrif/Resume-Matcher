@@ -136,7 +136,7 @@ async def score_bullets(
         response = await complete_json(
             prompt=prompt,
             system_prompt="You score resume bullets for relevance to a job. You never rewrite them.",
-            max_tokens=4096,
+            max_tokens=8192,
             schema_type="bullet_scores",
             response_validator=_make_validator(paths),
         )
