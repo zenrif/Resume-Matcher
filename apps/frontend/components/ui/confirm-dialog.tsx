@@ -76,7 +76,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
   const variantStyles = {
     danger: {
       icon: (
-        <div className="w-11 h-11 rounded-xl bg-red-50 text-red-600 flex items-center justify-center shrink-0">
+        <div className="w-11 h-11 rounded-xl bg-red-50 dark:bg-red-950/40 border border-transparent dark:border-red-900/50 text-red-600 dark:text-red-400 flex items-center justify-center shrink-0">
           <span className="text-xl font-bold">!</span>
         </div>
       ),
@@ -84,7 +84,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     },
     warning: {
       icon: (
-        <div className="w-11 h-11 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center shrink-0">
+        <div className="w-11 h-11 rounded-xl bg-amber-50 dark:bg-amber-950/40 border border-transparent dark:border-amber-900/50 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0">
           <span className="text-xl font-bold">!</span>
         </div>
       ),
@@ -92,7 +92,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     },
     success: {
       icon: (
-        <div className="w-11 h-11 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center shrink-0">
+        <div className="w-11 h-11 rounded-xl bg-emerald-50 dark:bg-emerald-950/40 border border-transparent dark:border-emerald-900/50 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
           <span className="text-xl font-bold">&#10003;</span>
         </div>
       ),
@@ -100,7 +100,7 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
     },
     default: {
       icon: (
-        <div className="w-11 h-11 rounded-xl bg-blue-50 text-primary flex items-center justify-center shrink-0">
+        <div className="w-11 h-11 rounded-xl bg-blue-50 dark:bg-blue-950/40 border border-transparent dark:border-blue-900/50 text-primary dark:text-blue-400 flex items-center justify-center shrink-0">
           <span className="text-xl font-bold">?</span>
         </div>
       ),
@@ -123,10 +123,10 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
           <div className="flex items-start gap-3.5">
             {icon}
             <div className="min-w-0 flex-1">
-              <DialogTitle className="font-sans text-lg font-semibold tracking-tight text-slate-900">
+              <DialogTitle className="font-sans text-lg font-semibold tracking-tight text-slate-900 dark:text-slate-100">
                 {title}
               </DialogTitle>
-              <DialogDescription className="font-sans text-sm text-slate-500 mt-1.5 max-h-60 overflow-y-auto whitespace-pre-wrap [overflow-wrap:anywhere] leading-relaxed">
+              <DialogDescription className="font-sans text-sm text-slate-500 dark:text-slate-400 mt-1.5 max-h-60 overflow-y-auto whitespace-pre-wrap [overflow-wrap:anywhere] leading-relaxed">
                 {description}
               </DialogDescription>
             </div>
@@ -134,12 +134,12 @@ export const ConfirmDialog: React.FC<ConfirmDialogProps> = ({
         </DialogHeader>
         {errorMessage && (
           <div className="px-6 pb-4">
-            <div className="rounded-lg border border-red-200 bg-red-50/80 p-3 font-sans text-xs text-red-600 max-h-60 overflow-y-auto whitespace-pre-wrap [overflow-wrap:anywhere]">
+            <div className="rounded-lg border border-red-200 dark:border-red-900/50 bg-red-50/80 dark:bg-red-950/40 p-3 font-sans text-xs text-red-600 dark:text-red-400 max-h-60 overflow-y-auto whitespace-pre-wrap [overflow-wrap:anywhere]">
               {errorMessage}
             </div>
           </div>
         )}
-        <DialogFooter className="p-4 bg-slate-50/80 border-t border-slate-100 flex-row justify-end gap-2.5">
+        <DialogFooter className="p-4 bg-slate-50/80 dark:bg-slate-950/50 border-t border-slate-100 dark:border-slate-800 flex-row justify-end gap-2.5">
           {showCancelButton && (
             <Button
               variant="outline"

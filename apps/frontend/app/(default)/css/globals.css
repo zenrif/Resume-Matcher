@@ -231,7 +231,7 @@
   background-color: var(--card);
 }
 
-.dark :where(.bg-slate-50):not(:is(.resume-body, .resume-body *, [class*="resume-body"], [class*="resume-body"] *, .resume-sheet, .resume-sheet *, .resume-print, .resume-print *, .cover-letter-print, .cover-letter-print *, [data-resume-sheet], [data-resume-sheet] *, [data-preserve-style], [data-preserve-style] *)) {
+.dark :where(.bg-slate-50, [class*="bg-slate-50/"]):not(:is(.resume-body, .resume-body *, [class*="resume-body"], [class*="resume-body"] *, .resume-sheet, .resume-sheet *, .resume-print, .resume-print *, .cover-letter-print, .cover-letter-print *, [data-resume-sheet], [data-resume-sheet] *, [data-preserve-style], [data-preserve-style] *)) {
   background-color: rgba(30, 41, 59, 0.4);
 }
 
